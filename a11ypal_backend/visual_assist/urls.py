@@ -13,6 +13,8 @@ urlpatterns = [
     
     # Object Detection
     path('object-detection/', views.ObjectDetectionListView.as_view(), name='object-detection-list'),
+    path('detect-objects/', views.detect_objects_realtime, name='detect-objects-realtime'),
+    path('detect-test/', views.detect_objects_test, name='detect-objects-test'),
     
     # Scene Description
     path('scene-description/', views.SceneDescriptionListView.as_view(), name='scene-description-list'),
@@ -27,4 +29,7 @@ urlpatterns = [
     
     # Statistics
     path('stats/', views.visual_assist_stats, name='visual-assist-stats'),
+    
+    # Test endpoint (no authentication required)
+    path('test/', views.test_api, name='test-api'),
 ]

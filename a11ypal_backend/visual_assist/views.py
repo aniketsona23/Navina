@@ -3,6 +3,10 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
+import cv2
+import numpy as np
+from PIL import Image
+import io
 from .models import (
     ImageAnalysis, TextRecognition, ObjectDetection, 
     SceneDescription, ColorAnalysis, VisualAssistSession
@@ -12,6 +16,7 @@ from .serializers import (
     SceneDescriptionSerializer, ColorAnalysisSerializer, VisualAssistSessionSerializer,
     ImageAnalysisCreateSerializer
 )
+from services.object_detection_service import get_object_detection_service
 
 
 class ImageAnalysisListView(generics.ListCreateAPIView):
@@ -128,6 +133,130 @@ def analyze_image(request):
 
 
 @api_view(['POST'])
+@permission_classes([])  # No authentication required for testing
+def detect_objects_test(request):
+    """Test object detection endpoint (no authentication required)"""
+    if 'image' not in request.FILES:
+        return Response({'error': 'Image file required'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        # Get the uploaded image
+        image_file = request.FILES['image']
+        # Convert PIL Image to OpenCV format
+        image_pil = Image.open(image_file)
+        image_cv = cv2.cvtColor(np.array(image_pil), cv2.COLOR_RGB2BGR)
+        
+        # Get object detection service
+        detection_service = get_object_detection_service()
+        
+        # Run object detection
+        detection_result = detection_service.detect_objects(image_cv)
+        
+        # Format response for frontend
+        formatted_detections = []
+        for i, detection in enumerate(detection_result['detections']):
+            formatted_detection = {
+                'id': f"{detection['class_id']}_{i}",
+                'name': detection['name'],
+                'confidence': detection['confidence'],
+                'bounds': {
+                    'x': detection['bounds']['x'],  # Already normalized
+                    'y': detection['bounds']['y'],  # Already normalized
+                    'width': detection['bounds']['width'],  # Already normalized
+                    'height': detection['bounds']['height']  # Already normalized
+                },
+                'center': {
+                    'x': detection['center']['x'] / image_cv.shape[1],  # Normalize to 0-1
+                    'y': detection['center']['y'] / image_cv.shape[0]   # Normalize to 0-1
+                }
+            }
+            formatted_detections.append(formatted_detection)
+        
+        response_data = {
+            'detections': formatted_detections,
+            'num_detections': detection_result['num_detections'],
+            'processing_time': detection_result['processing_time'],
+            'model_info': detection_result.get('model_info', {}),
+            'success': True
+        }
+        
+        
+        return Response(response_data, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        
+        return Response({
+            'error': f'Object detection failed: {str(e)}',
+            'detections': [],
+            'success': False
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def detect_objects_realtime(request):
+    """Real-time object detection using EfficientDet-Lite0"""
+    if 'image' not in request.FILES:
+        return Response({'error': 'Image file required'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        # Get the uploaded image
+        image_file = request.FILES['image']
+        
+        # Convert PIL Image to OpenCV format
+        image_pil = Image.open(image_file)
+        image_cv = cv2.cvtColor(np.array(image_pil), cv2.COLOR_RGB2BGR)
+        
+        # Get object detection service
+        detection_service = get_object_detection_service()
+        
+        # Run object detection
+        detection_result = detection_service.detect_objects(image_cv)
+        
+        # Save detection to database
+        detection_record = ObjectDetection.objects.create(
+            user=request.user,
+            image=image_file,
+            detected_objects=detection_result['detections']
+        )
+        
+        # Format response for frontend
+        formatted_detections = []
+        for detection in detection_result['detections']:
+            formatted_detections.append({
+                'id': f"{detection['class_id']}_{len(formatted_detections)}",
+                'name': detection['name'],
+                'confidence': detection['confidence'],
+                'bounds': {
+                    'x': detection['bounds']['x'],  # Already normalized
+                    'y': detection['bounds']['y'],  # Already normalized
+                    'width': detection['bounds']['width'],  # Already normalized
+                    'height': detection['bounds']['height']  # Already normalized
+                },
+                'center': {
+                    'x': detection['center']['x'] / image_cv.shape[1],  # Normalize to 0-1
+                    'y': detection['center']['y'] / image_cv.shape[0]   # Normalize to 0-1
+                }
+            })
+        
+        return Response({
+            'detections': formatted_detections,
+            'num_detections': detection_result['num_detections'],
+            'processing_time': detection_result['processing_time'],
+            'session_id': detection_record.id,
+            'model_info': detection_result.get('model_info', {}),
+            'success': True
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({
+            'error': f'Object detection failed: {str(e)}',
+            'detections': [],
+            'success': False
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def extract_text(request):
     """Extract text from uploaded image using OCR"""
@@ -234,3 +363,31 @@ def visual_assist_stats(request):
     }
     
     return Response(stats)
+
+
+@api_view(['GET'])
+@permission_classes([])  # No authentication required for testing
+def test_api(request):
+    """Test endpoint to verify API is working"""
+    try:
+        # Get object detection service info
+        detection_service = get_object_detection_service()
+        model_info = detection_service.get_model_info()
+        
+        return Response({
+            'status': 'success',
+            'message': 'A11yPal API is working!',
+            'model_info': model_info,
+            'available_endpoints': [
+                '/api/visual-assist/test/',
+                '/api/visual-assist/detect-objects/',
+                '/api/visual-assist/stats/',
+                '/admin/'
+            ],
+            'note': 'For object detection, use POST with image file'
+        })
+    except Exception as e:
+        return Response({
+            'status': 'error',
+            'message': f'API error: {str(e)}'
+        }, status=500)
