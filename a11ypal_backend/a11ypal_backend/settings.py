@@ -25,8 +25,8 @@ SECRET_KEY = 'django-insecure-8z0h-_1ewjk!3wl!lag87lj3gbudsj#hbj61m$4wkz5vk88n6w
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ['*', '10.30.9.162', 'localhost', '127.0.0.1']
+# ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'hearing_assist',
     'mobility_assist',
     'history',
+    'services',
 ]
 
 MIDDLEWARE = [

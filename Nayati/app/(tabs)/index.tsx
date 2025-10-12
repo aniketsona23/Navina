@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { HomeScreen } from '@/components/HomeScreen';
-import { VisualAssistScreen } from '@/components/VisualAssistScreen';
+import { VisualAssistScreen } from '@/components/VisualAssistScreenOptimized';
 import { HearingAssistScreen } from '@/components/HearingAssistScreen';
 import { MobilityAssistScreen } from '@/components/MobilityAssistScreen';
 import { useNavigation } from '@/contexts/NavigationContext';
