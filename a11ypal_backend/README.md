@@ -5,12 +5,14 @@ A comprehensive Django REST API backend for the A11yPal accessibility mobile app
 ## 🚀 Features
 
 ### User Management
+
 - User registration and authentication
 - User profiles with accessibility preferences
 - Emergency contact management
 - Privacy settings and data control
 
 ### Visual Assistance
+
 - Image analysis and object detection
 - OCR text recognition
 - Scene description generation
@@ -18,6 +20,7 @@ A comprehensive Django REST API backend for the A11yPal accessibility mobile app
 - Face detection capabilities
 
 ### Hearing Assistance
+
 - Speech-to-text transcription
 - Noise detection and analysis
 - Volume level analysis
@@ -25,6 +28,7 @@ A comprehensive Django REST API backend for the A11yPal accessibility mobile app
 - Hearing aid settings management
 
 ### Mobility Assistance
+
 - Location tracking and management
 - Accessible location database
 - Navigation route planning
@@ -32,6 +36,7 @@ A comprehensive Django REST API backend for the A11yPal accessibility mobile app
 - Emergency alert system
 
 ### History & Analytics
+
 - Activity logging and tracking
 - Usage statistics and analytics
 - Error logging and monitoring
@@ -41,6 +46,7 @@ A comprehensive Django REST API backend for the A11yPal accessibility mobile app
 ## 🛠️ Installation
 
 ### Prerequisites
+
 - Python 3.8+
 - pip
 - SQLite (default) or PostgreSQL/MySQL
@@ -48,27 +54,47 @@ A comprehensive Django REST API backend for the A11yPal accessibility mobile app
 ### Setup
 
 1. **Navigate to the backend directory:**
+
    ```bash
    cd a11ypal_backend
    ```
 
-2. **Install dependencies:**
+2. **Create and activate a virtual environment (recommended)**
+
+   Windows (cmd.exe):
+
+   ```bat
+   python -m venv .venv
+   .venv\Scripts\activate
+   ```
+
+   macOS / Linux (bash/zsh):
+
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate
+   ```
+
+3. **Install dependencies:**
+
    ```bash
    pip install -r requirements.txt
    ```
 
-3. **Run migrations:**
+4. **Run migrations:**
+
    ```bash
    python manage.py makemigrations
    python manage.py migrate
    ```
 
-4. **Create a superuser:**
+5. **Create a superuser:**
+
    ```bash
    python manage.py createsuperuser
    ```
 
-5. **Start the development server:**
+6. **Start the development server:**
    ```bash
    python manage.py runserver
    ```
@@ -78,11 +104,13 @@ The API will be available at `http://localhost:8000/`
 ## 📚 API Endpoints
 
 ### Authentication
+
 - `POST /api/users/register/` - User registration
 - `POST /api/users/login/` - User login
 - `POST /api/users/logout/` - User logout
 
 ### User Management
+
 - `GET /api/users/profile/` - Get user profile
 - `PUT /api/users/profile/` - Update user profile
 - `GET /api/users/profile/settings/` - Get accessibility settings
@@ -90,6 +118,7 @@ The API will be available at `http://localhost:8000/`
 - `GET /api/users/dashboard/` - Get user dashboard data
 
 ### Visual Assistance
+
 - `POST /api/visual-assist/analyze/` - Analyze image
 - `POST /api/visual-assist/extract-text/` - Extract text from image
 - `POST /api/visual-assist/describe-scene/` - Describe scene in image
@@ -98,6 +127,7 @@ The API will be available at `http://localhost:8000/`
 - `GET /api/visual-assist/stats/` - Get usage statistics
 
 ### Hearing Assistance
+
 - `POST /api/hearing-assist/transcribe/` - Transcribe audio to text
 - `POST /api/hearing-assist/detect-noise/` - Detect noise in audio
 - `POST /api/hearing-assist/analyze-volume/` - Analyze audio volume
@@ -107,6 +137,7 @@ The API will be available at `http://localhost:8000/`
 - `PUT /api/hearing-assist/hearing-aid-settings/` - Update hearing aid settings
 
 ### Mobility Assistance
+
 - `POST /api/mobility-assist/update-location/` - Update user location
 - `GET /api/mobility-assist/nearby-accessible/` - Find nearby accessible locations
 - `POST /api/mobility-assist/create-route/` - Create navigation route
@@ -116,6 +147,7 @@ The API will be available at `http://localhost:8000/`
 - `GET /api/mobility-assist/emergency-contacts/` - Manage emergency contacts
 
 ### History & Analytics
+
 - `POST /api/history/log-activity/` - Log user activity
 - `GET /api/history/dashboard/` - Get usage dashboard
 - `POST /api/history/submit-feedback/` - Submit user feedback
@@ -126,6 +158,7 @@ The API will be available at `http://localhost:8000/`
 ## 🔧 Configuration
 
 ### Environment Variables
+
 Create a `.env` file in the project root:
 
 ```env
@@ -136,7 +169,9 @@ DATABASE_URL=sqlite:///db.sqlite3
 ```
 
 ### CORS Settings
+
 The API is configured to allow requests from:
+
 - `http://localhost:3000` (React Native Web)
 - `http://localhost:8081` (Expo)
 - `http://localhost:8082` (Alternative Expo port)
@@ -144,10 +179,12 @@ The API is configured to allow requests from:
 ## 📊 Database Models
 
 ### User Models
+
 - `User` - Extended user model with accessibility fields
 - `UserProfile` - User accessibility preferences and settings
 
 ### Visual Assist Models
+
 - `ImageAnalysis` - Image analysis results
 - `TextRecognition` - OCR text extraction
 - `ObjectDetection` - Object detection results
@@ -155,6 +192,7 @@ The API is configured to allow requests from:
 - `ColorAnalysis` - Color accessibility analysis
 
 ### Hearing Assist Models
+
 - `AudioAnalysis` - Audio analysis results
 - `SpeechToText` - Speech transcription
 - `NoiseDetection` - Noise analysis
@@ -163,6 +201,7 @@ The API is configured to allow requests from:
 - `HearingAidSettings` - User hearing aid preferences
 
 ### Mobility Assist Models
+
 - `LocationData` - User location tracking
 - `AccessibilityLocation` - Accessible location database
 - `NavigationRoute` - Navigation routes
@@ -171,6 +210,7 @@ The API is configured to allow requests from:
 - `EmergencyAlert` - Emergency alerts
 
 ### History Models
+
 - `ActivityLog` - User activity logging
 - `UsageStatistics` - Usage analytics
 - `FeatureUsage` - Feature usage tracking
@@ -200,6 +240,7 @@ The backend is designed to work seamlessly with the React Native mobile app. Key
 ## 🚀 Deployment
 
 ### Production Settings
+
 1. Set `DEBUG=False`
 2. Configure proper database (PostgreSQL recommended)
 3. Set up static file serving
@@ -208,6 +249,7 @@ The backend is designed to work seamlessly with the React Native mobile app. Key
 6. Configure proper logging
 
 ### Docker Deployment
+
 ```dockerfile
 FROM python:3.9
 WORKDIR /app
@@ -220,6 +262,7 @@ CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
 ## 📈 Monitoring
 
 The API includes comprehensive logging and monitoring:
+
 - Activity logging for all user actions
 - Error tracking and reporting
 - Usage analytics and statistics
@@ -241,6 +284,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## 🆘 Support
 
 For support and questions:
+
 - Create an issue in the repository
 - Contact the development team
 - Check the documentation
