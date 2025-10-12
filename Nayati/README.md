@@ -1,50 +1,112 @@
-# Welcome to your Expo app 👋
+# A11yPal Mobile App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A React Native Expo app for accessibility assistance with visual, hearing, and mobility support features.
 
-## Get started
+## Features
 
-1. Install dependencies
+- **Visual Assist**: Object detection, text reading, and navigation guidance
+- **Hearing Assist**: Live transcription, sound alerts, and visual notifications  
+- **Mobility Assist**: Accessible routes, indoor navigation, and mobility guidance
+- **Interactive Map**: Building map with search and navigation
+- **History**: Track usage and access previous sessions
+- **Settings**: Customize accessibility preferences
 
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v16 or later)
+- npm or yarn
+- Expo CLI
+- iOS Simulator (for iOS development) or Android Studio (for Android development)
+
+### Installation
+
+1. Navigate to the Nayati directory:
+   ```bash
+   cd Nayati
+   ```
+
+2. Install dependencies:
    ```bash
    npm install
    ```
 
-2. Start the app
-
+3. Start the development server:
    ```bash
-   npx expo start
+   npm start
    ```
 
-In the output, you'll find options to open the app in a
+4. Run on your preferred platform:
+   - **iOS**: Press `i` in the terminal or scan QR code with Expo Go app
+   - **Android**: Press `a` in the terminal or scan QR code with Expo Go app
+   - **Web**: Press `w` in the terminal
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## App Structure
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```
+Nayati/
+├── app/                    # Expo Router pages
+│   ├── (tabs)/            # Tab navigation screens
+│   │   ├── index.tsx      # Main home screen
+│   │   ├── history.tsx    # History tab
+│   │   ├── map.tsx        # Map tab
+│   │   └── settings.tsx   # Settings tab
+│   └── _layout.tsx        # Root layout
+├── components/            # React Native components
+│   ├── ui/               # Reusable UI components
+│   ├── figma/            # Figma-specific components
+│   └── [Screen].tsx      # Main screen components
+├── contexts/             # React contexts
+│   └── NavigationContext.tsx
+├── types/                # TypeScript type definitions
+│   └── navigation.ts
+└── App.tsx              # Main app component
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Navigation
 
-## Learn more
+The app uses a custom navigation context that manages screen state. Each screen can navigate to other screens using the `onNavigate` prop.
 
-To learn more about developing your project with Expo, look at the following resources:
+### Available Screens
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+- `home` - Main landing page
+- `visual` - Visual assistance features
+- `hearing` - Hearing assistance features  
+- `mobility` - Mobility assistance features
+- `map` - Interactive building map
+- `history` - Usage history
+- `settings` - App settings
 
-## Join the community
+## Development
 
-Join our community of developers creating universal apps.
+### Adding New Screens
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+1. Create a new component in `components/`
+2. Add the screen type to `types/navigation.ts`
+3. Update the navigation context and main screen renderer
+4. Add any necessary tab navigation
+
+### Styling
+
+The app uses React Native's StyleSheet for styling. All components follow a consistent design system with:
+
+- Primary colors: Blue (#2563EB), Orange (#EA580C), Green (#16A34A)
+- Typography: System fonts with consistent sizing
+- Spacing: 8px base unit
+- Border radius: 8px, 12px, 16px variants
+
+## Accessibility
+
+The app is designed with accessibility in mind:
+
+- High contrast mode support
+- Large text options
+- Voice announcements
+- Haptic feedback
+- Screen reader compatibility
+- Keyboard navigation support
+
+## License
+
+This project is part of the A11yPal accessibility platform.
