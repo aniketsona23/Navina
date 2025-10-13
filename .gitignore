@@ -3,4 +3,3 @@ src/**
 venv
 env
 .env*.local
-nayati_flutter
