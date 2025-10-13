@@ -3,7 +3,7 @@ import axios from 'axios';
 // API Configuration
 // For mobile devices, use your computer's IP address instead of localhost
 // Find your IP with: ipconfig (Windows) or ifconfig (Mac/Linux)
-const API_BASE_URL = 'http://10.30.9.162:8000/api'; // Replace with your actual IP
+const API_BASE_URL = 'http://10.30.8.17:8000/api'; // Django backend running on your computer's IP
 const API_TIMEOUT = 30000; // 30 seconds
 
 // Create axios instance

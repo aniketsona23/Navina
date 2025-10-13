@@ -1,32 +1,42 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { HomeScreen } from '@/components/HomeScreen';
-import { VisualAssistScreen } from '@/components/VisualAssistScreenOptimized';
-import { HearingAssistScreen } from '@/components/HearingAssistScreen';
-import { MobilityAssistScreen } from '@/components/MobilityAssistScreen';
-import { useNavigation } from '@/contexts/NavigationContext';
+import { router } from 'expo-router';
 
 export default function MainScreen() {
-  const { currentScreen, navigate } = useNavigation();
-
-  const renderScreen = () => {
-    switch (currentScreen) {
-      case 'home':
-        return <HomeScreen onNavigate={navigate} />;
+  const navigate = (screen: string) => {
+    console.log('Navigating to screen:', screen);
+    switch (screen) {
+      case 'settings':
+        router.push('/(tabs)/settings');
+        break;
+      case 'history':
+        router.push('/(tabs)/history');
+        break;
+      case 'map':
+        router.push('/(tabs)/map');
+        break;
       case 'visual':
-        return <VisualAssistScreen onNavigate={navigate} />;
+        console.log('Pushing to visual modal');
+        router.push('/visual-modal');
+        break;
       case 'hearing':
-        return <HearingAssistScreen onNavigate={navigate} />;
+        console.log('Pushing to hearing modal');
+        router.push('/hearing-modal');
+        break;
       case 'mobility':
-        return <MobilityAssistScreen onNavigate={navigate} />;
+        console.log('Pushing to mobility modal');
+        router.push('/mobility-modal');
+        break;
       default:
-        return <HomeScreen onNavigate={navigate} />;
+        console.log('Unknown screen:', screen);
+        break;
     }
   };
 
   return (
     <View style={styles.container}>
-      {renderScreen()}
+      <HomeScreen onNavigate={navigate} />
     </View>
   );
 }

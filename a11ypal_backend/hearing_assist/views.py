@@ -3,6 +3,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
+import logging
 from .models import (
     AudioAnalysis, SpeechToText, NoiseDetection, 
     VolumeAnalysis, FrequencyAnalysis, HearingAssistSession, HearingAidSettings
@@ -12,6 +13,9 @@ from .serializers import (
     VolumeAnalysisSerializer, FrequencyAnalysisSerializer, HearingAssistSessionSerializer,
     HearingAidSettingsSerializer, AudioAnalysisCreateSerializer
 )
+from services.speech_to_text_service import speech_to_text_service
+
+logger = logging.getLogger(__name__)
 
 
 class AudioAnalysisListView(generics.ListCreateAPIView):
@@ -99,36 +103,64 @@ class HearingAidSettingsView(generics.RetrieveUpdateAPIView):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def transcribe_audio(request):
-    """Transcribe audio file to text"""
-    if 'audio_file' not in request.FILES:
-        return Response({'error': 'Audio file required'}, status=status.HTTP_400_BAD_REQUEST)
-    
-    audio_file = request.FILES['audio_file']
-    language = request.data.get('language', 'en')
-    
-    # Mock transcription result
-    mock_text = "Hello, this is a sample transcription of the audio file. The speech recognition technology has successfully converted the spoken words into text format."
-    mock_confidence = 0.92
-    mock_speaker_count = 1
-    mock_timestamps = [
-        {'word': 'Hello', 'start': 0.0, 'end': 0.5},
-        {'word': 'this', 'start': 0.5, 'end': 0.8},
-        {'word': 'is', 'start': 0.8, 'end': 1.0},
-        {'word': 'a', 'start': 1.0, 'end': 1.1},
-        {'word': 'sample', 'start': 1.1, 'end': 1.6},
-    ]
-    
-    speech_to_text = SpeechToText.objects.create(
-        user=request.user,
-        audio_file=audio_file,
-        transcribed_text=mock_text,
-        language=language,
-        confidence_score=mock_confidence,
-        speaker_count=mock_speaker_count,
-        timestamps=mock_timestamps
-    )
-    
-    return Response(SpeechToTextSerializer(speech_to_text).data, status=status.HTTP_201_CREATED)
+    """Transcribe audio file to text using RealTimeSTT and other STT engines"""
+    try:
+        if 'audio_file' not in request.FILES:
+            return Response({'error': 'Audio file required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        audio_file = request.FILES['audio_file']
+        language = request.data.get('language', 'en')
+        
+        # Validate file type
+        allowed_types = ['audio/wav', 'audio/mp3', 'audio/mpeg', 'audio/ogg', 'audio/m4a']
+        if audio_file.content_type not in allowed_types:
+            return Response({
+                'error': 'Unsupported audio format. Please upload WAV, MP3, OGG, or M4A files.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Validate file size (max 10MB)
+        max_size = 10 * 1024 * 1024  # 10MB
+        if audio_file.size > max_size:
+            return Response({
+                'error': 'File too large. Maximum size is 10MB.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        logger.info(f"Processing audio file: {audio_file.name}, size: {audio_file.size} bytes, language: {language}")
+        
+        # Process audio using speech-to-text service
+        transcription_result = speech_to_text_service.process_audio_file(audio_file, language)
+        
+        # Save to database
+        speech_to_text = SpeechToText.objects.create(
+            user=request.user,
+            audio_file=audio_file,
+            transcribed_text=transcription_result['transcribed_text'],
+            language=transcription_result['language'],
+            confidence_score=transcription_result['confidence_score'],
+            speaker_count=transcription_result['speaker_count'],
+            timestamps=transcription_result['timestamps']
+        )
+        
+        logger.info(f"Successfully transcribed audio for user {request.user.id}")
+        
+        # Return the result
+        return Response({
+            'id': speech_to_text.id,
+            'transcribed_text': speech_to_text.transcribed_text,
+            'confidence_score': speech_to_text.confidence_score,
+            'language': speech_to_text.language,
+            'speaker_count': speech_to_text.speaker_count,
+            'timestamps': speech_to_text.timestamps,
+            'duration': transcription_result['duration'],
+            'processing_time': transcription_result['processing_time'],
+            'created_at': speech_to_text.created_at
+        }, status=status.HTTP_201_CREATED)
+        
+    except Exception as e:
+        logger.error(f"Error transcribing audio: {str(e)}")
+        return Response({
+            'error': f'Transcription failed: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['POST'])

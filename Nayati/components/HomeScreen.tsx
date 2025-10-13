@@ -1,16 +1,15 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Screen } from '../types/navigation';
 
 interface HomeScreenProps {
-  onNavigate: (screen: Screen) => void;
+  onNavigate: (screen: string) => void;
 }
 
 export function HomeScreen({ onNavigate }: HomeScreenProps) {
   const modes = [
     {
-      id: 'visual' as Screen,
+      id: 'visual',
       title: 'Visual Assist',
       description: 'Object detection, text reading, and navigation guidance',
       icon: 'eye-outline' as keyof typeof Ionicons.glyphMap,
@@ -18,7 +17,7 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
       textColor: '#FFFFFF'
     },
     {
-      id: 'hearing' as Screen,
+      id: 'hearing',
       title: 'Hearing Assist',
       description: 'Live transcription, sound alerts, and visual notifications',
       icon: 'ear-outline' as keyof typeof Ionicons.glyphMap,
@@ -26,7 +25,7 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
       textColor: '#FFFFFF'
     },
     {
-      id: 'mobility' as Screen,
+      id: 'mobility',
       title: 'Mobility Assist',
       description: 'Accessible routes, indoor navigation, and mobility guidance',
       icon: 'location-outline' as keyof typeof Ionicons.glyphMap,

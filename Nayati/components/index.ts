@@ -1,6 +1,6 @@
 // Main Screen Components
 export { HomeScreen } from './HomeScreen';
-export { VisualAssistScreen } from './VisualAssistScreen';
+export { VisualAssistScreen } from './VisualAssistScreenOptimized';
 export { HearingAssistScreen } from './HearingAssistScreen';
 export { MobilityAssistScreen } from './MobilityAssistScreen';
 export { MapScreen } from './MapScreen';

@@ -40,24 +40,7 @@ export function VisualAssistScreen({ onNavigate }: VisualAssistScreenProps) {
     }
   }, [permission, requestPermission]);
 
-  // Disable shutter sound on iOS
-  useEffect(() => {
-    const disableShutterSound = async () => {
-      try {
-        const { Audio } = await import('expo-av');
-        await Audio.setAudioModeAsync({
-          allowsRecordingIOS: false,
-          staysActiveInBackground: false,
-          playsInSilentModeIOS: true,
-          shouldDuckAndroid: true,
-          playThroughEarpieceAndroid: false,
-        });
-      } catch (error) {
-      }
-    };
-    
-    disableShutterSound();
-  }, []);
+  // Note: Shutter sound configuration removed as it's not needed for camera capture
 
   useEffect(() => {
   }, [detectedObjects, isDetecting, processingTime]);

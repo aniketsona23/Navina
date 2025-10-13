@@ -1,21 +1,142 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Screen } from '../types/navigation';
+import { useAudioRecording } from '../hooks/useAudioRecording';
+import { SpeechToTextService, SpeechToTextResponse } from '../services/speechToTextApi';
+import { testBackendConnection, getBackendInfo } from '../services/networkTest';
 
 interface HearingAssistScreenProps {
-  onNavigate: (screen: Screen) => void;
+  onNavigate: (screen: string) => void;
+}
+
+interface TranscriptItem {
+  speaker: string;
+  text: string;
+  time: string;
+  confidence?: number;
 }
 
 export function HearingAssistScreen({ onNavigate }: HearingAssistScreenProps) {
-  const [isListening, setIsListening] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [transcript, setTranscript] = useState<TranscriptItem[]>([]);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [currentLanguage, setCurrentLanguage] = useState('en');
+  
+  // Audio recording hook
+  const {
+    isRecording,
+    isPaused,
+    duration,
+    recordingUri,
+    error: recordingError,
+    startRecording,
+    stopRecording,
+    pauseRecording,
+    resumeRecording,
+    resetRecording,
+  } = useAudioRecording();
 
-  const transcript = [
-    { speaker: 'John', text: 'Can you help me find the meeting room?', time: '2:34 PM' },
-    { speaker: 'Sarah', text: 'Sure, it\'s on the second floor, room 205.', time: '2:35 PM' },
-    { speaker: 'John', text: 'Thank you so much!', time: '2:35 PM' }
-  ];
+  // Load transcription history on mount
+  useEffect(() => {
+    loadTranscriptionHistory();
+  }, []);
+
+  // Handle recording errors
+  useEffect(() => {
+    if (recordingError) {
+      Alert.alert('Recording Error', recordingError);
+    }
+  }, [recordingError]);
+
+  const loadTranscriptionHistory = async () => {
+    try {
+      const history = await SpeechToTextService.getTranscriptionHistory();
+      const formattedHistory: TranscriptItem[] = history.map(item => ({
+        speaker: 'User',
+        text: item.transcribed_text,
+        time: new Date(item.created_at).toLocaleTimeString(),
+        confidence: item.confidence_score,
+      }));
+      setTranscript(formattedHistory);
+    } catch (error) {
+      console.error('Failed to load transcription history:', error);
+    }
+  };
+
+  const handleStartRecording = async () => {
+    try {
+      await startRecording();
+    } catch (error) {
+      Alert.alert('Error', 'Failed to start recording');
+    }
+  };
+
+  const handleStopRecording = async () => {
+    try {
+      const uri = await stopRecording();
+      if (uri) {
+        await transcribeAudio(uri);
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to stop recording');
+    }
+  };
+
+  const transcribeAudio = async (audioUri: string) => {
+    setIsProcessing(true);
+    try {
+      const result = await SpeechToTextService.transcribeAudio(audioUri, currentLanguage);
+      
+      // Add to transcript
+      const newItem: TranscriptItem = {
+        speaker: 'User',
+        text: result.transcribed_text,
+        time: new Date().toLocaleTimeString(),
+        confidence: result.confidence_score,
+      };
+      
+      setTranscript(prev => [newItem, ...prev]);
+      
+      // Show success message
+      Alert.alert(
+        'Transcription Complete',
+        `Confidence: ${(result.confidence_score * 100).toFixed(1)}%`
+      );
+      
+    } catch (error: any) {
+      Alert.alert('Transcription Error', error.message || 'Failed to transcribe audio');
+    } finally {
+      setIsProcessing(false);
+      resetRecording();
+    }
+  };
+
+  const testNetworkConnection = async () => {
+    try {
+      const result = await testBackendConnection();
+      const backendInfo = getBackendInfo();
+      
+      if (result.isConnected) {
+        Alert.alert(
+          '✅ Network Test Passed',
+          `Backend is reachable!\nResponse time: ${result.responseTime}ms\nURL: ${backendInfo.baseURL}`
+        );
+      } else {
+        Alert.alert(
+          '❌ Network Test Failed',
+          `Error: ${result.error}\n\nPlease check:\n1. Backend server is running\n2. IP address is correct: ${backendInfo.baseURL}\n3. Both devices are on same network`
+        );
+      }
+    } catch (error: any) {
+      Alert.alert('Network Test Error', error.message || 'Failed to test connection');
+    }
+  };
+
+  const formatDuration = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
@@ -46,26 +167,74 @@ export function HearingAssistScreen({ onNavigate }: HearingAssistScreenProps) {
           </View>
         </View>
 
-        {/* Main Listen Button */}
+        {/* Main Record Button */}
         <TouchableOpacity
-          onPress={() => setIsListening(!isListening)}
-          style={[styles.listenButton, { backgroundColor: isListening ? '#C2410C' : '#EA580C' }]}
+          onPress={isRecording ? handleStopRecording : handleStartRecording}
+          style={[styles.listenButton, { backgroundColor: isRecording ? '#C2410C' : '#EA580C' }]}
           activeOpacity={0.8}
+          disabled={isProcessing}
         >
-          {isListening ? <Ionicons name="mic-off-outline" size={24} color="#FFFFFF" /> : <Ionicons name="mic-outline" size={24} color="#FFFFFF" />}
-          <Text style={styles.listenButtonText}>
-            {isListening ? 'Stop Listening' : 'Start Listening'}
-          </Text>
+          {isProcessing ? (
+            <ActivityIndicator size="small" color="#FFFFFF" />
+          ) : (
+            <>
+              {isRecording ? (
+                <Ionicons name="stop-outline" size={24} color="#FFFFFF" />
+              ) : (
+                <Ionicons name="mic-outline" size={24} color="#FFFFFF" />
+              )}
+              <Text style={styles.listenButtonText}>
+                {isProcessing ? 'Processing...' : isRecording ? 'Stop Recording' : 'Start Recording'}
+              </Text>
+            </>
+          )}
         </TouchableOpacity>
 
+        {/* Recording Controls */}
+        {isRecording && (
+          <View style={styles.recordingControls}>
+            <TouchableOpacity
+              onPress={isPaused ? resumeRecording : pauseRecording}
+              style={styles.controlButton}
+              activeOpacity={0.7}
+            >
+              {isPaused ? (
+                <Ionicons name="play-outline" size={20} color="#EA580C" />
+              ) : (
+                <Ionicons name="pause-outline" size={20} color="#EA580C" />
+              )}
+            </TouchableOpacity>
+            
+            <Text style={styles.durationText}>{formatDuration(duration)}</Text>
+            
+            <TouchableOpacity
+              onPress={resetRecording}
+              style={styles.controlButton}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="refresh-outline" size={20} color="#EA580C" />
+            </TouchableOpacity>
+          </View>
+        )}
+
         {/* Live Status */}
-        {isListening && (
+        {isRecording && (
           <View style={styles.liveStatus}>
             <View style={styles.liveIndicator}>
               <View style={styles.liveDot} />
-              <Text style={styles.liveText}>Live</Text>
+              <Text style={styles.liveText}>Recording</Text>
             </View>
-            <Text style={styles.liveDescription}>Currently listening for speech...</Text>
+            <Text style={styles.liveDescription}>
+              {isPaused ? 'Recording paused...' : 'Currently recording audio...'}
+            </Text>
+          </View>
+        )}
+
+        {/* Processing Status */}
+        {isProcessing && (
+          <View style={styles.processingStatus}>
+            <ActivityIndicator size="small" color="#EA580C" />
+            <Text style={styles.processingText}>Transcribing audio...</Text>
           </View>
         )}
       </View>
@@ -85,15 +254,30 @@ export function HearingAssistScreen({ onNavigate }: HearingAssistScreenProps) {
         </View>
         
         <ScrollView style={styles.transcriptContainer} showsVerticalScrollIndicator={false}>
-          {transcript.map((item, index) => (
-            <View key={index} style={styles.transcriptItem}>
-              <View style={styles.transcriptHeader}>
-                <Text style={styles.speakerName}>{item.speaker}</Text>
-                <Text style={styles.transcriptTime}>{item.time}</Text>
-              </View>
-              <Text style={styles.transcriptText}>{item.text}</Text>
+          {transcript.length === 0 ? (
+            <View style={styles.emptyTranscript}>
+              <Ionicons name="chatbubble-outline" size={48} color="#D1D5DB" />
+              <Text style={styles.emptyTranscriptText}>No transcriptions yet</Text>
+              <Text style={styles.emptyTranscriptSubtext}>Start recording to see transcriptions here</Text>
             </View>
-          ))}
+          ) : (
+            transcript.map((item, index) => (
+              <View key={index} style={styles.transcriptItem}>
+                <View style={styles.transcriptHeader}>
+                  <Text style={styles.speakerName}>{item.speaker}</Text>
+                  <View style={styles.transcriptMeta}>
+                    {item.confidence && (
+                      <Text style={styles.confidenceText}>
+                        {(item.confidence * 100).toFixed(0)}%
+                      </Text>
+                    )}
+                    <Text style={styles.transcriptTime}>{item.time}</Text>
+                  </View>
+                </View>
+                <Text style={styles.transcriptText}>{item.text}</Text>
+              </View>
+            ))
+          )}
         </ScrollView>
       </View>
 
@@ -134,6 +318,15 @@ export function HearingAssistScreen({ onNavigate }: HearingAssistScreenProps) {
         >
           <Ionicons name="play-outline" size={20} color="#EA580C" />
           <Text style={styles.quickActionText}>History</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity
+          onPress={testNetworkConnection}
+          style={styles.quickActionButton}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="wifi-outline" size={20} color="#EA580C" />
+          <Text style={styles.quickActionText}>Test API</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -254,8 +447,43 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   controlButton: {
-    padding: 4,
-    borderRadius: 4,
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: '#F9FAFB',
+  },
+  recordingControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 16,
+    marginTop: 16,
+    padding: 12,
+    backgroundColor: 'rgba(234, 88, 12, 0.05)',
+    borderRadius: 12,
+  },
+  durationText: {
+    color: '#EA580C',
+    fontSize: 16,
+    fontWeight: '600',
+    minWidth: 50,
+    textAlign: 'center',
+  },
+  processingStatus: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    padding: 16,
+    backgroundColor: 'rgba(234, 88, 12, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(234, 88, 12, 0.3)',
+    borderRadius: 12,
+    marginTop: 16,
+  },
+  processingText: {
+    color: '#EA580C',
+    fontSize: 14,
+    fontWeight: '500',
   },
   transcriptContainer: {
     maxHeight: 128,
@@ -271,6 +499,37 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 4,
+  },
+  transcriptMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  confidenceText: {
+    color: '#10B981',
+    fontSize: 12,
+    fontWeight: '600',
+    backgroundColor: '#ECFDF5',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  emptyTranscript: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 32,
+  },
+  emptyTranscriptText: {
+    color: '#6B7280',
+    fontSize: 16,
+    fontWeight: '500',
+    marginTop: 12,
+    marginBottom: 4,
+  },
+  emptyTranscriptSubtext: {
+    color: '#9CA3AF',
+    fontSize: 14,
+    textAlign: 'center',
   },
   speakerName: {
     color: '#EA580C',
