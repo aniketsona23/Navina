@@ -15,6 +15,7 @@ urlpatterns = [
     path('object-detection/', views.ObjectDetectionListView.as_view(), name='object-detection-list'),
     path('detect-objects/', views.detect_objects_realtime, name='detect-objects-realtime'),
     path('detect-test/', views.detect_objects_test, name='detect-objects-test'),
+    path('detect-simple/', views.detect_objects_test_simple, name='detect-objects-simple'),
     
     # Scene Description
     path('scene-description/', views.SceneDescriptionListView.as_view(), name='scene-description-list'),

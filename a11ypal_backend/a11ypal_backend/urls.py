@@ -18,9 +18,11 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from . import health_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/health/', health_views.health_check, name='health_check'),
     path('api/users/', include('users.urls')),
     path('api/visual-assist/', include('visual_assist.urls')),
     path('api/hearing-assist/', include('hearing_assist.urls')),

@@ -193,32 +193,118 @@ def detect_objects_test(request):
 
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([])  # No authentication required for testing
+def detect_objects_test_simple(request):
+    """Simple test endpoint for object detection debugging"""
+    if 'image' not in request.FILES:
+        return Response({'error': 'Image file required'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        print("🧪 SIMPLE TEST - Starting object detection...")
+        
+        # Get the uploaded image
+        image_file = request.FILES['image']
+        print(f"📸 Image file received: {image_file.name}, size: {image_file.size}")
+        
+        # Convert PIL Image to OpenCV format
+        image_pil = Image.open(image_file)
+        print(f"🖼️ PIL Image opened: {image_pil.size}, mode: {image_pil.mode}")
+        
+        image_cv = cv2.cvtColor(np.array(image_pil), cv2.COLOR_RGB2BGR)
+        print(f"🔄 Converted to OpenCV: {image_cv.shape}")
+        
+        # Return success without running detection
+        return Response({
+            'status': 'success',
+            'message': 'Image processing successful',
+            'image_info': {
+                'name': image_file.name,
+                'size': image_file.size,
+                'pil_size': image_pil.size,
+                'pil_mode': image_pil.mode,
+                'cv_shape': image_cv.shape,
+            },
+            'detections': [],
+            'success': True
+        })
+        
+    except Exception as e:
+        print(f"❌ Simple test error: {str(e)}")
+        print(f"❌ Error type: {type(e).__name__}")
+        import traceback
+        print(f"❌ Traceback: {traceback.format_exc()}")
+        
+        return Response({
+            'error': f'Simple test failed: {str(e)}',
+            'error_type': type(e).__name__,
+            'traceback': traceback.format_exc(),
+            'success': False
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@permission_classes([])  # No authentication required for testing
 def detect_objects_realtime(request):
     """Real-time object detection using EfficientDet-Lite0"""
     if 'image' not in request.FILES:
         return Response({'error': 'Image file required'}, status=status.HTTP_400_BAD_REQUEST)
     
     try:
+        print(f"🔍 Starting object detection...")
+        
         # Get the uploaded image
         image_file = request.FILES['image']
+        print(f"📸 Image file received: {image_file.name}, size: {image_file.size}")
         
         # Convert PIL Image to OpenCV format
         image_pil = Image.open(image_file)
+        print(f"🖼️ PIL Image opened: {image_pil.size}, mode: {image_pil.mode}")
+        
         image_cv = cv2.cvtColor(np.array(image_pil), cv2.COLOR_RGB2BGR)
+        print(f"🔄 Converted to OpenCV: {image_cv.shape}")
         
         # Get object detection service
-        detection_service = get_object_detection_service()
+        print(f"🔧 Getting detection service...")
+        try:
+            detection_service = get_object_detection_service()
+            print(f"✅ Detection service loaded")
+        except Exception as e:
+            print(f"❌ Failed to load detection service: {str(e)}")
+            print(f"❌ Service error type: {type(e).__name__}")
+            import traceback
+            print(f"❌ Service traceback: {traceback.format_exc()}")
+            return Response({
+                'error': f'Detection service failed to load: {str(e)}',
+                'error_type': type(e).__name__,
+                'detections': [],
+                'success': False
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         # Run object detection
-        detection_result = detection_service.detect_objects(image_cv)
+        print(f"🎯 Running object detection...")
+        try:
+            detection_result = detection_service.detect_objects(image_cv)
+            print(f"📊 Detection result: {detection_result}")
+        except Exception as e:
+            print(f"❌ Object detection failed: {str(e)}")
+            print(f"❌ Detection error type: {type(e).__name__}")
+            import traceback
+            print(f"❌ Detection traceback: {traceback.format_exc()}")
+            return Response({
+                'error': f'Object detection failed: {str(e)}',
+                'error_type': type(e).__name__,
+                'detections': [],
+                'success': False
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-        # Save detection to database
-        detection_record = ObjectDetection.objects.create(
-            user=request.user,
-            image=image_file,
-            detected_objects=detection_result['detections']
-        )
+        # Save detection to database (only if user is authenticated)
+        detection_record = None
+        if request.user.is_authenticated:
+            detection_record = ObjectDetection.objects.create(
+                user=request.user,
+                image=image_file,
+                detected_objects=detection_result['detections']
+            )
         
         # Format response for frontend
         formatted_detections = []
@@ -243,14 +329,20 @@ def detect_objects_realtime(request):
             'detections': formatted_detections,
             'num_detections': detection_result['num_detections'],
             'processing_time': detection_result['processing_time'],
-            'session_id': detection_record.id,
+            'session_id': detection_record.id if detection_record else None,
             'model_info': detection_result.get('model_info', {}),
             'success': True
         }, status=status.HTTP_200_OK)
         
     except Exception as e:
+        print(f"❌ Object detection error: {str(e)}")
+        print(f"❌ Error type: {type(e).__name__}")
+        import traceback
+        print(f"❌ Traceback: {traceback.format_exc()}")
+        
         return Response({
             'error': f'Object detection failed: {str(e)}',
+            'error_type': type(e).__name__,
             'detections': [],
             'success': False
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -370,24 +462,49 @@ def visual_assist_stats(request):
 def test_api(request):
     """Test endpoint to verify API is working"""
     try:
-        # Get object detection service info
-        detection_service = get_object_detection_service()
-        model_info = detection_service.get_model_info()
+        print("🧪 Testing API endpoint...")
+        
+        # Test object detection service loading
+        print("🔧 Testing detection service loading...")
+        try:
+            detection_service = get_object_detection_service()
+            print("✅ Detection service loaded successfully")
+            
+            model_info = detection_service.get_model_info()
+            print(f"📊 Model info: {model_info}")
+            
+            return Response({
+                'status': 'success',
+                'message': 'A11yPal API is working!',
+                'model_info': model_info,
+                'available_endpoints': [
+                    '/api/visual-assist/test/',
+                    '/api/visual-assist/detect-objects/',
+                    '/api/visual-assist/stats/',
+                    '/admin/'
+                ],
+                'note': 'For object detection, use POST with image file'
+            })
+        except Exception as service_error:
+            print(f"❌ Detection service error: {str(service_error)}")
+            print(f"❌ Service error type: {type(service_error).__name__}")
+            import traceback
+            print(f"❌ Service traceback: {traceback.format_exc()}")
+            
+            return Response({
+                'status': 'error',
+                'message': f'Detection service error: {str(service_error)}',
+                'error_type': type(service_error).__name__,
+                'traceback': traceback.format_exc()
+            }, status=500)
+            
+    except Exception as e:
+        print(f"❌ General API error: {str(e)}")
+        import traceback
+        print(f"❌ General traceback: {traceback.format_exc()}")
         
         return Response({
-            'status': 'success',
-            'message': 'A11yPal API is working!',
-            'model_info': model_info,
-            'available_endpoints': [
-                '/api/visual-assist/test/',
-                '/api/visual-assist/detect-objects/',
-                '/api/visual-assist/stats/',
-                '/admin/'
-            ],
-            'note': 'For object detection, use POST with image file'
-        })
-    except Exception as e:
-        return Response({
             'status': 'error',
-            'message': f'API error: {str(e)}'
+            'message': f'API error: {str(e)}',
+            'traceback': traceback.format_exc()
         }, status=500)

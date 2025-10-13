@@ -91,50 +91,63 @@ class YOLOv5Service:
             raise Exception("YOLOv5 model not loaded!")
         
         try:
+            print(f"🔍 YOLOv5: Starting inference on image shape: {image.shape}")
+            print(f"🔍 YOLOv5: Image dtype: {image.dtype}")
+            print(f"🔍 YOLOv5: Image min/max: {image.min()}/{image.max()}")
             
             # Run YOLOv5 inference with lower confidence threshold
+            print(f"🔍 YOLOv5: Calling model inference...")
             results = self.yolov5_model(image, conf=0.25, iou=0.45, verbose=False)
+            print(f"🔍 YOLOv5: Inference completed, results type: {type(results)}")
+            print(f"🔍 YOLOv5: Results length: {len(results) if results else 'None'}")
             
             detections = []
             if results and len(results) > 0:
                 result = results[0]  # Get first (and only) result
+                print(f"🔍 YOLOv5: Processing result, boxes: {result.boxes is not None}")
                 
                 if result.boxes is not None and len(result.boxes) > 0:
+                    print(f"🔍 YOLOv5: Found {len(result.boxes)} detections")
                     boxes = result.boxes.xyxy.cpu().numpy()  # Get bounding boxes
                     confidences = result.boxes.conf.cpu().numpy()  # Get confidences
                     class_ids = result.boxes.cls.cpu().numpy().astype(int)  # Get class IDs
+                    print(f"🔍 YOLOv5: Boxes shape: {boxes.shape}, Confidences shape: {confidences.shape}, Class IDs shape: {class_ids.shape}")
+                else:
+                    print(f"🔍 YOLOv5: No detections found")
+            else:
+                print(f"🔍 YOLOv5: No results returned")
+            
+            # Process each detection
+            if results and len(results) > 0 and result.boxes is not None and len(result.boxes) > 0:
+                for i, (box, confidence, class_id) in enumerate(zip(boxes, confidences, class_ids)):
+                    x1, y1, x2, y2 = box
                     
+                    # Get class name
+                    class_name = self.yolov5_model.names[class_id]
                     
-                    # Process each detection
-                    for i, (box, confidence, class_id) in enumerate(zip(boxes, confidences, class_ids)):
-                        x1, y1, x2, y2 = box
-                        
-                        # Get class name
-                        class_name = self.yolov5_model.names[class_id]
-                        
-                        # Convert to our format
-                        detection = {
-                            'id': f'yolov5_{i}',
-                            'class_id': int(class_id),
-                            'name': class_name,
-                            'confidence': float(confidence),
-                            'bounds': {
-                                'x': float(x1 / image.shape[1]),  # Normalized x position
-                                'y': float(y1 / image.shape[0]),  # Normalized y position
-                                'width': float((x2 - x1) / image.shape[1]),  # Normalized width
-                                'height': float((y2 - y1) / image.shape[0]),  # Normalized height
-                                'x1': int(x1),
-                                'y1': int(y1),
-                                'x2': int(x2),
-                                'y2': int(y2)
-                            },
-                            'center': {
-                                'x': float((x1 + x2) / 2),
-                                'y': float((y1 + y2) / 2)
-                            }
+                    # Convert to our format
+                    detection = {
+                        'id': f'yolov5_{i}',
+                        'class_id': int(class_id),
+                        'name': class_name,
+                        'confidence': float(confidence),
+                        'bounds': {
+                            'x': float(x1 / image.shape[1]),  # Normalized x position
+                            'y': float(y1 / image.shape[0]),  # Normalized y position
+                            'width': float((x2 - x1) / image.shape[1]),  # Normalized width
+                            'height': float((y2 - y1) / image.shape[0]),  # Normalized height
+                            'x1': int(x1),
+                            'y1': int(y1),
+                            'x2': int(x2),
+                            'y2': int(y2)
+                        },
+                        'center': {
+                            'x': float((x1 + x2) / 2),
+                            'y': float((y1 + y2) / 2)
                         }
-                        
-                        detections.append(detection)            
+                    }
+                    
+                    detections.append(detection)            
             processing_time = time.time() - start_time
             
             return {
