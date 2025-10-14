@@ -70,7 +70,7 @@ class AppConstants {
   static const String logoPath = 'assets/images/logo.png';
 
   // API endpoints
-  static const String baseUrl = 'http://10.53.175.29:8000/api';
+  static const String baseUrl = 'http://10.30.8.17:8000/api';
   static const String healthEndpoint = '/health/';
   static const String visualAssistEndpoint = '/visual-assist/detect-objects/';
   static const String hearingAssistEndpoint = '/hearing-assist/transcribe/';

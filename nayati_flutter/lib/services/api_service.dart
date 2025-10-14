@@ -1,31 +1,44 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
 import '../utils/logger_util.dart';
+import 'config_service.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://10.53.175.29:8000/api';
   static const int timeout = 30000;
 
-  final Dio _dio = Dio(BaseOptions(
-    baseUrl: baseUrl,
-    connectTimeout: const Duration(milliseconds: timeout),
-    receiveTimeout: const Duration(milliseconds: timeout),
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  ));
+  late final Dio _dio;
 
   ApiService() {
+    _initializeDio();
+  }
+  
+  Future<void> _initializeDio() async {
+    final baseUrl = await ConfigService.getBackendUrl();
+    _dio = Dio(BaseOptions(
+      baseUrl: baseUrl,
+      connectTimeout: const Duration(milliseconds: timeout),
+      receiveTimeout: const Duration(milliseconds: timeout),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    ));
+    
     _dio.interceptors.add(LogInterceptor(
       requestBody: true,
       responseBody: true,
       logPrint: (obj) => AppLogger.debug('API: $obj'),
     ));
   }
+  
+  /// Update the base URL and reinitialize the Dio instance
+  Future<void> updateBaseUrl() async {
+    await _initializeDio();
+  }
 
   // Health check
   Future<Map<String, dynamic>> checkHealth() async {
     try {
+      final baseUrl = await ConfigService.getBackendUrl();
       AppLogger.info('Attempting to connect to: $baseUrl');
       AppLogger.debug('Full URL: $baseUrl/health/');
       

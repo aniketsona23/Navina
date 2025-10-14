@@ -110,9 +110,11 @@ The app connects to the same Django backend as the React Native version:
 
 ### Configuration
 
-1. **Update API Base URL** (if needed):
-   - Edit `lib/services/api_service.dart`
-   - Change the `baseUrl` constant to match your backend server
+1. **Backend Configuration** (Flexible Setup):
+   - **Easy Setup**: Use the app's Settings → Backend Configuration
+   - **Environment Variables**: Use `--dart-define=BACKEND_URL=http://YOUR_IP:8000/api`
+   - **Auto-detect**: App automatically tries to find the best backend URL
+   - See [BACKEND_CONFIG_GUIDE.md](BACKEND_CONFIG_GUIDE.md) for detailed instructions
 
 2. **Configure Permissions**:
    - The app automatically requests camera and microphone permissions

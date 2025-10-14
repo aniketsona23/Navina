@@ -9,6 +9,7 @@ import 'providers/navigation_provider.dart';
 import 'providers/speech_recognition_provider.dart';
 import 'providers/text_to_speech_provider.dart';
 import 'providers/history_provider.dart';
+import 'services/config_service.dart';
 import 'screens/home_screen.dart';
 import 'screens/history_screen.dart';
 import 'screens/map_screen.dart';
@@ -20,6 +21,9 @@ import 'theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize configuration service
+  await ConfigService.initialize();
   
   // Request permissions
   await _requestPermissions();
