@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../theme/app_theme.dart';
+import 'indoor_navigation_screen.dart';
 
 class MobilityAssistScreen extends StatefulWidget {
   const MobilityAssistScreen({super.key});
@@ -91,9 +92,14 @@ class _MobilityAssistScreenState extends State<MobilityAssistScreen> {
           children: [
             Expanded(
               child: _buildDestinationButton(
-                'Building Map',
-                Icons.map_outlined,
-                () => context.go('/map'),
+                'Indoor Nav',
+                Icons.home_outlined,
+                () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const IndoorNavigationScreen(),
+                  ),
+                ),
                 isPrimary: true,
               ),
             ),
@@ -103,6 +109,28 @@ class _MobilityAssistScreenState extends State<MobilityAssistScreen> {
                 'Outdoor Nav',
                 Icons.navigation_outlined,
                 () => context.go('/free-outdoor-navigation'),
+                isPrimary: false,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _buildDestinationButton(
+                'Building Map',
+                Icons.map_outlined,
+                () => context.go('/map'),
+                isPrimary: false,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildDestinationButton(
+                'Quick Start',
+                Icons.play_arrow,
+                () => _showQuickStartDialog(),
                 isPrimary: false,
               ),
             ),
@@ -451,6 +479,45 @@ class _MobilityAssistScreenState extends State<MobilityAssistScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  void _showQuickStartDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Quick Start Navigation'),
+          content: const Text(
+            'Choose your preferred navigation mode to get started quickly.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const IndoorNavigationScreen(),
+                  ),
+                );
+              },
+              child: const Text('Indoor Navigation'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                context.go('/free-outdoor-navigation');
+              },
+              child: const Text('Outdoor Navigation'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+          ],
+        );
+      },
     );
   }
 }

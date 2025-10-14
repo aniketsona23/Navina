@@ -7,6 +7,7 @@ import 'providers/audio_recording_provider.dart';
 import 'providers/object_detection_provider.dart';
 import 'providers/navigation_provider.dart';
 import 'providers/speech_recognition_provider.dart';
+import 'providers/indoor_navigation_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/history_screen.dart';
 import 'screens/map_screen.dart';
@@ -45,6 +46,7 @@ class NayatiApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ObjectDetectionProvider()),
         ChangeNotifierProvider(create: (_) => NavigationProvider()),
         ChangeNotifierProvider(create: (_) => SpeechRecognitionProvider()),
+        ChangeNotifierProvider(create: (_) => IndoorNavigationProvider()),
       ],
       child: MaterialApp.router(
         title: 'Nayati',
@@ -77,7 +79,7 @@ final GoRouter _router = GoRouter(
         ),
         GoRoute(
           path: '/map',
-          builder: (context, state) => const MapScreen(),
+          builder: (context, state) => const FreeOutdoorNavigationScreen(),
         ),
         GoRoute(
           path: '/settings',

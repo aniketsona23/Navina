@@ -153,6 +153,13 @@ class HomeScreen extends StatelessWidget {
           children: [
             _buildQuickAccessButton(
               context,
+              'Map',
+              Icons.map_outlined,
+              () => context.go('/map'),
+            ),
+            const SizedBox(width: 16),
+            _buildQuickAccessButton(
+              context,
               'History',
               Icons.history_outlined,
               () => context.go('/history'),

@@ -26,6 +26,7 @@ dependencies:
   # Audio Recording and Speech Recognition
   flutter_sound: ^9.2.13
   speech_to_text: ^7.0.0
+  flutter_tts: ^3.8.5
   permission_handler: ^11.3.1
   
   # Camera and Image Processing
