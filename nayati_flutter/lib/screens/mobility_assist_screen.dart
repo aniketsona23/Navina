@@ -89,7 +89,7 @@ class _MobilityAssistScreenState extends State<MobilityAssistScreen> {
               child: _buildDestinationButton(
                 'Outdoor Nav',
                 Icons.navigation_outlined,
-                () {},
+                () => context.go('/free-outdoor-navigation'),
                 isPrimary: false,
               ),
             ),
