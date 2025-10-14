@@ -31,4 +31,8 @@ urlpatterns = [
     # Analytics
     path('stats/', views.mobility_assist_stats, name='mobility-assist-stats'),
     path('accessibility-rating/', views.accessibility_rating, name='accessibility-rating'),
+    
+    # Outdoor Navigation
+    path('search-destination/', views.search_destination, name='search-destination'),
+    path('get-directions/', views.get_directions, name='get-directions'),
 ]

@@ -160,28 +160,77 @@ def create_navigation_route(request):
     end_lat = request.data.get('end_latitude')
     end_lng = request.data.get('end_longitude')
     preferences = request.data.get('accessibility_preferences', {})
+    route_type = request.data.get('route_type', 'indoor')  # indoor or outdoor
     
     if not all([start_lat, start_lng, end_lat, end_lng]):
         return Response({'error': 'Start and end coordinates required'}, status=status.HTTP_400_BAD_REQUEST)
     
-    # Mock route data (in a real app, you'd use a navigation API)
-    mock_route_data = {
-        'waypoints': [
-            {'lat': float(start_lat), 'lng': float(start_lng)},
-            {'lat': float(end_lat), 'lng': float(end_lng)}
-        ],
-        'instructions': [
-            'Head north on Main Street',
-            'Turn right onto Accessible Avenue',
-            'Continue for 500 meters',
-            'Arrive at destination'
-        ],
-        'accessibility_features': [
-            'Wheelchair accessible path',
-            'Audio announcements available',
-            'Tactile paving present'
-        ]
-    }
+    # Enhanced route data for outdoor navigation
+    if route_type == 'outdoor':
+        # More detailed outdoor route data
+        mock_route_data = {
+            'waypoints': [
+                {'lat': float(start_lat), 'lng': float(start_lng)},
+                {'lat': float(end_lat), 'lng': float(end_lng)}
+            ],
+            'instructions': [
+                'Head north on Main Street for 0.3 miles',
+                'Turn right onto Accessible Avenue',
+                'Continue straight for 0.5 miles',
+                'Turn left onto Accessible Lane',
+                'Arrive at destination on your right'
+            ],
+            'accessibility_features': [
+                'Wheelchair accessible sidewalks',
+                'Audio announcements available at intersections',
+                'Tactile paving at crosswalks',
+                'Accessible pedestrian signals',
+                'Wide sidewalks (minimum 5 feet)'
+            ],
+            'hazards': [
+                {'type': 'construction', 'description': 'Construction zone ahead', 'location': {'lat': 0, 'lng': 0}},
+                {'type': 'steep_incline', 'description': 'Steep incline on Accessible Avenue', 'location': {'lat': 0, 'lng': 0}}
+            ],
+            'alternative_routes': [
+                {
+                    'name': 'Wheelchair Accessible Route',
+                    'distance': 1.2,
+                    'duration': 18,
+                    'accessibility_score': 5
+                },
+                {
+                    'name': 'Fastest Route',
+                    'distance': 0.8,
+                    'duration': 12,
+                    'accessibility_score': 3
+                }
+            ]
+        }
+        estimated_duration = 18  # minutes
+        distance = 1200  # meters
+        accessibility_score = 4
+    else:
+        # Indoor route data
+        mock_route_data = {
+            'waypoints': [
+                {'lat': float(start_lat), 'lng': float(start_lng)},
+                {'lat': float(end_lat), 'lng': float(end_lng)}
+            ],
+            'instructions': [
+                'Head north towards the main entrance',
+                'Use the accessible ramp on your left',
+                'Enter through the automatic doors',
+                'Turn right at the information desk'
+            ],
+            'accessibility_features': [
+                'Wheelchair accessible path',
+                'Audio announcements available',
+                'Tactile paving present'
+            ]
+        }
+        estimated_duration = 15  # minutes
+        distance = 800  # meters
+        accessibility_score = 4
     
     route = NavigationRoute.objects.create(
         user=request.user,
@@ -191,9 +240,9 @@ def create_navigation_route(request):
         end_longitude=end_lng,
         route_data=mock_route_data,
         accessibility_preferences=preferences,
-        estimated_duration=15,  # minutes
-        distance=1200,  # meters
-        accessibility_score=4
+        estimated_duration=estimated_duration,
+        distance=distance,
+        accessibility_score=accessibility_score
     )
     
     return Response(NavigationRouteSerializer(route).data, status=status.HTTP_201_CREATED)
@@ -289,3 +338,124 @@ def accessibility_rating(request):
     }
     
     return Response(rating_data)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def search_destination(request):
+    """Search for outdoor destinations"""
+    query = request.data.get('query')
+    latitude = request.data.get('latitude')
+    longitude = request.data.get('longitude')
+    radius = float(request.data.get('radius', 5000))  # Default 5km radius
+    
+    if not query:
+        return Response({'error': 'Search query required'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    # Mock search results - in a real app, you'd use Google Places API or similar
+    mock_results = [
+        {
+            'place_id': '1',
+            'name': f'{query} - Main Location',
+            'address': '123 Main Street, City, State',
+            'latitude': float(latitude) + 0.01 if latitude else 37.7749,
+            'longitude': float(longitude) + 0.01 if longitude else -122.4194,
+            'rating': 4.5,
+            'accessibility_rating': 4.2,
+            'types': ['establishment', 'point_of_interest'],
+            'accessibility_features': [
+                'Wheelchair accessible entrance',
+                'Accessible parking',
+                'Audio announcements'
+            ]
+        },
+        {
+            'place_id': '2',
+            'name': f'{query} - Branch Location',
+            'address': '456 Oak Avenue, City, State',
+            'latitude': float(latitude) + 0.02 if latitude else 37.7849,
+            'longitude': float(longitude) + 0.02 if longitude else -122.4094,
+            'rating': 4.2,
+            'accessibility_rating': 3.8,
+            'types': ['establishment', 'point_of_interest'],
+            'accessibility_features': [
+                'Wheelchair accessible entrance',
+                'Elevator available'
+            ]
+        }
+    ]
+    
+    return Response({
+        'results': mock_results,
+        'status': 'OK'
+    })
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def get_directions(request):
+    """Get detailed directions for outdoor navigation"""
+    origin_lat = request.data.get('origin_latitude')
+    origin_lng = request.data.get('origin_longitude')
+    destination_lat = request.data.get('destination_latitude')
+    destination_lng = request.data.get('destination_longitude')
+    mode = request.data.get('mode', 'walking')  # walking, driving, transit
+    accessibility_preferences = request.data.get('accessibility_preferences', {})
+    
+    if not all([origin_lat, origin_lng, destination_lat, destination_lng]):
+        return Response({'error': 'Origin and destination coordinates required'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    # Mock directions data - in a real app, you'd use Google Directions API
+    directions_data = {
+        'routes': [
+            {
+                'route_id': '1',
+                'summary': 'Wheelchair Accessible Route',
+                'legs': [
+                    {
+                        'distance': {'text': '1.2 mi', 'value': 1931},
+                        'duration': {'text': '18 mins', 'value': 1080},
+                        'steps': [
+                            {
+                                'instruction': 'Head north on Main Street',
+                                'distance': {'text': '0.3 mi', 'value': 483},
+                                'duration': {'text': '5 mins', 'value': 300},
+                                'start_location': {'lat': float(origin_lat), 'lng': float(origin_lng)},
+                                'end_location': {'lat': float(origin_lat) + 0.005, 'lng': float(origin_lng)},
+                                'accessibility_features': ['Wide sidewalk', 'Tactile paving'],
+                                'hazards': []
+                            },
+                            {
+                                'instruction': 'Turn right onto Accessible Avenue',
+                                'distance': {'text': '0.5 mi', 'value': 805},
+                                'duration': {'text': '8 mins', 'value': 480},
+                                'start_location': {'lat': float(origin_lat) + 0.005, 'lng': float(origin_lng)},
+                                'end_location': {'lat': float(origin_lat) + 0.008, 'lng': float(origin_lng) + 0.008},
+                                'accessibility_features': ['Accessible pedestrian signal', 'Audio announcements'],
+                                'hazards': []
+                            },
+                            {
+                                'instruction': 'Turn left onto Accessible Lane',
+                                'distance': {'text': '0.4 mi', 'value': 643},
+                                'duration': {'text': '5 mins', 'value': 300},
+                                'start_location': {'lat': float(origin_lat) + 0.008, 'lng': float(origin_lng) + 0.008},
+                                'end_location': {'lat': float(destination_lat), 'lng': float(destination_lng)},
+                                'accessibility_features': ['Wheelchair accessible path', 'Elevated crosswalk'],
+                                'hazards': []
+                            }
+                        ]
+                    }
+                ],
+                'accessibility_score': 4.5,
+                'accessibility_features': [
+                    'Wheelchair accessible sidewalks',
+                    'Audio announcements at intersections',
+                    'Tactile paving at crosswalks',
+                    'Accessible pedestrian signals'
+                ]
+            }
+        ],
+        'status': 'OK'
+    }
+    
+    return Response(directions_data)
