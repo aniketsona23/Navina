@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://10.53.175.29:8000/api';
+  static const String baseUrl = 'http://10.30.11.234:8000/api';
   static const int timeout = 30000;
 
   final Dio _dio = Dio(BaseOptions(

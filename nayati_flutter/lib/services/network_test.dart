@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 
 class NetworkTest {
   static const List<String> possibleUrls = [
+    'http://10.30.11.234:8000/api',
     'http://10.53.175.29:8000/api',
     'http://10.30.8.17:8000/api',
     'http://127.0.0.1:8000/api',

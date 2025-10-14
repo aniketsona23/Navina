@@ -45,5 +45,23 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	
+	<!-- Location permissions -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app needs location access to provide navigation assistance and show your current location on the map.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>This app needs location access to provide navigation assistance and show your current location on the map.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>This app needs location access to provide navigation assistance and show your current location on the map.</string>
+	
+	<!-- Camera and Microphone permissions -->
+	<key>NSCameraUsageDescription</key>
+	<string>This app needs camera access for visual assistance features.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app needs microphone access for speech recognition and audio assistance features.</string>
+	
+	<!-- Google Maps configuration -->
+	<key>io.flutter.embedded_views_preview</key>
+	<true/>
 </dict>
 </plist>

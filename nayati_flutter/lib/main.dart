@@ -14,6 +14,7 @@ import 'screens/settings_screen.dart';
 import 'screens/visual_assist_screen.dart';
 import 'screens/hearing_assist_screen.dart';
 import 'screens/mobility_assist_screen.dart';
+import 'screens/free_outdoor_navigation_screen.dart';
 import 'theme/app_theme.dart';
 
 void main() async {
@@ -97,6 +98,10 @@ final GoRouter _router = GoRouter(
     GoRoute(
       path: '/mobility-assist',
       builder: (context, state) => const MobilityAssistScreen(),
+    ),
+    GoRoute(
+      path: '/free-outdoor-navigation',
+      builder: (context, state) => const FreeOutdoorNavigationScreen(),
     ),
   ],
 );
