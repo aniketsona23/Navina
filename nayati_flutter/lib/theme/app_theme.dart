@@ -10,6 +10,16 @@ class AppTheme {
   static const Color textPrimary = Color(0xFF1F2937);
   static const Color textSecondary = Color(0xFF6B7280);
   static const Color borderColor = Color(0xFFE5E7EB);
+  
+  // Modern design colors
+  static const Color cardBackground = Color(0xFFFFFFFF);
+  static const Color cardShadow = Color(0x0A000000);
+  static const Color accentBlue = Color(0xFF2563EB);
+  static const Color accentGreen = Color(0xFF16A34A);
+  static const Color accentOrange = Color(0xFFEA580C);
+  static const Color accentGray = Color(0xFF6B7280);
+  static const Color lightGray = Color(0xFFF3F4F6);
+  static const Color mediumGray = Color(0xFF9CA3AF);
 
   static ThemeData get lightTheme {
     return ThemeData(

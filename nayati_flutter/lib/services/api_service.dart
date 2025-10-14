@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
+import '../utils/logger_util.dart';
 
 class ApiService {
   static const String baseUrl = 'http://10.53.175.29:8000/api';
@@ -7,8 +8,8 @@ class ApiService {
 
   final Dio _dio = Dio(BaseOptions(
     baseUrl: baseUrl,
-    connectTimeout: Duration(milliseconds: timeout),
-    receiveTimeout: Duration(milliseconds: timeout),
+    connectTimeout: const Duration(milliseconds: timeout),
+    receiveTimeout: const Duration(milliseconds: timeout),
     headers: {
       'Content-Type': 'application/json',
     },
@@ -18,31 +19,31 @@ class ApiService {
     _dio.interceptors.add(LogInterceptor(
       requestBody: true,
       responseBody: true,
-      logPrint: (obj) => print(obj),
+      logPrint: (obj) => AppLogger.debug('API: $obj'),
     ));
   }
 
   // Health check
   Future<Map<String, dynamic>> checkHealth() async {
     try {
-      print('🌐 Attempting to connect to: $baseUrl');
-      print('🌐 Full URL: $baseUrl/health/');
+      AppLogger.info('Attempting to connect to: $baseUrl');
+      AppLogger.debug('Full URL: $baseUrl/health/');
       
       final response = await _dio.get('/health/');
-      print('✅ Health check successful: ${response.statusCode}');
+      AppLogger.info('Health check successful: ${response.statusCode}');
       return {
         'success': true,
         'status': response.statusCode,
         'data': response.data,
       };
     } catch (e) {
-      print('❌ Health check failed: $e');
-      print('❌ Error type: ${e.runtimeType}');
+      AppLogger.error('Health check failed: $e');
+      AppLogger.debug('Error type: ${e.runtimeType}');
       if (e is DioException) {
-        print('❌ Dio error type: ${e.type}');
-        print('❌ Dio error message: ${e.message}');
-        print('❌ Dio response: ${e.response?.data}');
-        print('❌ Dio status code: ${e.response?.statusCode}');
+        AppLogger.error('Dio error type: ${e.type}');
+        AppLogger.error('Dio error message: ${e.message}');
+        AppLogger.debug('Dio response: ${e.response?.data}');
+        AppLogger.debug('Dio status code: ${e.response?.statusCode}');
       }
       return {
         'success': false,
@@ -69,7 +70,7 @@ class ApiService {
         ),
       });
 
-      print('📤 Sending image to backend: $imagePath');
+      AppLogger.info('Sending image to backend: $imagePath');
       final response = await _dio.post(
         '/visual-assist/detect-objects/',
         data: formData,
@@ -80,8 +81,8 @@ class ApiService {
         ),
       );
 
-      print('📥 Backend response status: ${response.statusCode}');
-      print('📥 Backend response data: ${response.data}');
+      AppLogger.debug('Backend response status: ${response.statusCode}');
+      AppLogger.debug('Backend response data: ${response.data}');
 
       return {
         'success': true,
@@ -149,7 +150,7 @@ class ApiService {
       final response = await _dio.get('/hearing-assist/history/');
       return List<Map<String, dynamic>>.from(response.data ?? []);
     } catch (e) {
-      print('Failed to get transcription history: $e');
+      AppLogger.error('Failed to get transcription history: $e');
       return [];
     }
   }

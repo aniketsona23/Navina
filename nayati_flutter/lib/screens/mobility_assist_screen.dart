@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../theme/app_theme.dart';
+import '../widgets/common/index.dart';
+import '../constants/app_constants.dart';
 
 class MobilityAssistScreen extends StatefulWidget {
   const MobilityAssistScreen({super.key});
@@ -13,7 +15,7 @@ class _MobilityAssistScreenState extends State<MobilityAssistScreen> {
   bool _isNavigating = false;
   final TextEditingController _destinationController = TextEditingController();
 
-  final List<Map<String, dynamic>> _navigationSteps = [
+  static const List<Map<String, dynamic>> _navigationSteps = [
     {
       'instruction': 'Head north towards the main entrance',
       'distance': '50 ft',
@@ -44,29 +46,21 @@ class _MobilityAssistScreenState extends State<MobilityAssistScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
-      appBar: AppBar(
-        title: const Text('Mobility Assist'),
-        backgroundColor: AppTheme.mobilityAssistColor,
-        foregroundColor: Colors.white,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
-        ),
-      ),
+    return AssistScaffold(
+      title: AppConstants.mobilityAssistTitle,
+      assistColor: AppTheme.mobilityAssistColor,
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(AppConstants.defaultPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildQuickDestinations(),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppConstants.defaultSpacing),
             if (_isNavigating)
               _buildActiveNavigation()
             else
               _buildStartNavigation(),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppConstants.defaultSpacing),
             _buildAccessibilityFeatures(),
           ],
         ),
@@ -78,15 +72,8 @@ class _MobilityAssistScreenState extends State<MobilityAssistScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Quick Destinations',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            color: AppTheme.textPrimary,
-          ),
-        ),
-        const SizedBox(height: 16),
+        SectionTitle('Quick Destinations'),
+        const SizedBox(height: AppConstants.defaultSpacing),
         Row(
           children: [
             Expanded(
@@ -97,7 +84,7 @@ class _MobilityAssistScreenState extends State<MobilityAssistScreen> {
                 isPrimary: true,
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppConstants.defaultSpacing),
             Expanded(
               child: _buildDestinationButton(
                 'Outdoor Nav',
@@ -118,46 +105,37 @@ class _MobilityAssistScreenState extends State<MobilityAssistScreen> {
     VoidCallback onTap, {
     required bool isPrimary,
   }) {
-    return Material(
-      color: isPrimary ? AppTheme.mobilityAssistColor : AppTheme.surfaceColor,
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              Icon(
-                icon,
-                color: isPrimary ? Colors.white : AppTheme.textPrimary,
-                size: 24,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                title,
-                style: TextStyle(
-                  color: isPrimary ? Colors.white : AppTheme.textPrimary,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
+    return AppCard(
+      backgroundColor: isPrimary ? AppTheme.mobilityAssistColor : AppTheme.surfaceColor,
+      borderRadius: AppConstants.buttonBorderRadius,
+      onTap: onTap,
+      padding: const EdgeInsets.all(AppConstants.defaultSpacing),
+      child: Column(
+        children: [
+          Icon(
+            icon,
+            color: isPrimary ? Colors.white : AppTheme.textPrimary,
+            size: AppConstants.defaultIconSize,
           ),
-        ),
+          const SizedBox(height: AppConstants.smallSpacing),
+          Text(
+            title,
+            style: TextStyle(
+              color: isPrimary ? Colors.white : AppTheme.textPrimary,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildActiveNavigation() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppTheme.surfaceColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.mobilityAssistColor),
-      ),
+    return AppCard(
+      backgroundColor: AppTheme.surfaceColor,
+      borderRadius: 16,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -175,19 +153,19 @@ class _MobilityAssistScreenState extends State<MobilityAssistScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: AppTheme.mobilityAssistColor.withOpacity(0.1),
+                  color: AppTheme.mobilityAssistColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Row(
+                child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.timer_outlined,
                       size: 16,
                       color: AppTheme.mobilityAssistColor,
                     ),
-                    const SizedBox(width: 4),
-                    const Text(
+                    SizedBox(width: 4),
+                    Text(
                       '3 min remaining',
                       style: TextStyle(
                         color: AppTheme.mobilityAssistColor,
@@ -303,9 +281,9 @@ class _MobilityAssistScreenState extends State<MobilityAssistScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Start Indoor Navigation',
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
               color: AppTheme.textPrimary,
@@ -353,14 +331,7 @@ class _MobilityAssistScreenState extends State<MobilityAssistScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Accessibility Features',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            color: AppTheme.textPrimary,
-          ),
-        ),
+        SectionTitle('Accessibility Features'),
         const SizedBox(height: 16),
         _buildFeatureCard(
           'Voice Guidance',
@@ -409,7 +380,7 @@ class _MobilityAssistScreenState extends State<MobilityAssistScreen> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppTheme.mobilityAssistColor.withOpacity(0.1),
+                  color: AppTheme.mobilityAssistColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(

@@ -7,6 +7,8 @@ import 'providers/audio_recording_provider.dart';
 import 'providers/object_detection_provider.dart';
 import 'providers/navigation_provider.dart';
 import 'providers/speech_recognition_provider.dart';
+import 'providers/text_to_speech_provider.dart';
+import 'providers/history_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/history_screen.dart';
 import 'screens/map_screen.dart';
@@ -44,6 +46,8 @@ class NayatiApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ObjectDetectionProvider()),
         ChangeNotifierProvider(create: (_) => NavigationProvider()),
         ChangeNotifierProvider(create: (_) => SpeechRecognitionProvider()),
+        ChangeNotifierProvider(create: (_) => TextToSpeechProvider()),
+        ChangeNotifierProvider(create: (_) => HistoryProvider()),
       ],
       child: MaterialApp.router(
         title: 'Nayati',

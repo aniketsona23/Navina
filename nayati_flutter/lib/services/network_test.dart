@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
+import '../utils/logger_util.dart';
 
 class NetworkTest {
   static const List<String> possibleUrls = [
@@ -12,10 +13,10 @@ class NetworkTest {
   ];
 
   static Future<Map<String, dynamic>> testAllConnections() async {
-    print('🔍 Testing network connections...');
+    AppLogger.info('Testing network connections...');
     
     for (String url in possibleUrls) {
-      print('🌐 Testing: $url');
+      AppLogger.debug('Testing: $url');
       
       try {
         final dio = Dio();
@@ -24,7 +25,7 @@ class NetworkTest {
         dio.options.receiveTimeout = const Duration(seconds: 5);
         
         final response = await dio.get('/health/');
-        print('✅ SUCCESS: $url - Status: ${response.statusCode}');
+        AppLogger.info('SUCCESS: $url - Status: ${response.statusCode}');
         return {
           'success': true,
           'workingUrl': url,
@@ -32,7 +33,7 @@ class NetworkTest {
           'data': response.data,
         };
       } catch (e) {
-        print('❌ FAILED: $url - $e');
+        AppLogger.warning('FAILED: $url - $e');
       }
     }
     
@@ -44,7 +45,7 @@ class NetworkTest {
   }
 
   static Future<Map<String, dynamic>> testSpecificUrl(String url) async {
-    print('🌐 Testing specific URL: $url');
+    AppLogger.info('Testing specific URL: $url');
     
     try {
       final dio = Dio();
@@ -53,7 +54,7 @@ class NetworkTest {
       dio.options.receiveTimeout = const Duration(seconds: 10);
       
       final response = await dio.get('/health/');
-      print('✅ SUCCESS: $url - Status: ${response.statusCode}');
+      AppLogger.info('SUCCESS: $url - Status: ${response.statusCode}');
       return {
         'success': true,
         'url': url,
@@ -61,7 +62,7 @@ class NetworkTest {
         'data': response.data,
       };
     } catch (e) {
-      print('❌ FAILED: $url - $e');
+      AppLogger.error('FAILED: $url - $e');
       if (e is DioException) {
         return {
           'success': false,
@@ -91,7 +92,7 @@ class NetworkTest {
         }
       }
     } catch (e) {
-      print('Error getting local IPs: $e');
+      AppLogger.error('Error getting local IPs: $e');
     }
     
     return ips;

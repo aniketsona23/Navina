@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../theme/app_theme.dart';
+import '../widgets/common/index.dart';
+import '../constants/app_constants.dart';
 
+/// Main home screen displaying assistance mode options
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -11,13 +14,13 @@ class HomeScreen extends StatelessWidget {
       backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(AppConstants.defaultPadding),
           child: Column(
             children: [
               _buildHeader(context),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppConstants.defaultSpacing),
               _buildModeCards(context),
-              const SizedBox(height: 32),
+              const SizedBox(height: AppConstants.largeSpacing),
               _buildQuickAccess(context),
             ],
           ),
@@ -30,22 +33,26 @@ class HomeScreen extends StatelessWidget {
     return Column(
       children: [
         Container(
-          width: 128,
-          height: 128,
+          width: 128.0,
+          height: 128.0,
           decoration: BoxDecoration(
-            color: AppTheme.primaryColor.withOpacity(0.1),
+            color: AppTheme.primaryColor.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(20),
           ),
-          child: const Icon(
-            Icons.accessibility_new,
-            size: 64,
-            color: AppTheme.primaryColor,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: Image.asset(
+              AppConstants.appIconPath,
+              width: 128.0,
+              height: 128.0,
+              fit: BoxFit.cover,
+            ),
           ),
         ),
-        const SizedBox(height: 16),
-        const Text(
-          'Choose your assistance mode',
-          style: TextStyle(
+        const SizedBox(height: AppConstants.defaultSpacing),
+        Text(
+          AppConstants.chooseModeText,
+          style: const TextStyle(
             fontSize: 16,
             color: AppTheme.textSecondary,
           ),
@@ -56,24 +63,24 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildModeCards(BuildContext context) {
-    final modes = [
+    const modes = [
       {
         'id': 'visual',
-        'title': 'Visual Assist',
+        'title': AppConstants.visualAssistTitle,
         'description': 'Object detection, text reading, and navigation guidance',
         'icon': Icons.visibility_outlined,
         'color': AppTheme.visualAssistColor,
       },
       {
         'id': 'hearing',
-        'title': 'Hearing Assist',
+        'title': AppConstants.hearingAssistTitle,
         'description': 'Live transcription, sound alerts, and visual notifications',
         'icon': Icons.hearing_outlined,
         'color': AppTheme.hearingAssistColor,
       },
       {
         'id': 'mobility',
-        'title': 'Mobility Assist',
+        'title': AppConstants.mobilityAssistTitle,
         'description': 'Accessible routes, indoor navigation, and mobility guidance',
         'icon': Icons.directions_walk_outlined,
         'color': AppTheme.mobilityAssistColor,
@@ -83,51 +90,48 @@ class HomeScreen extends StatelessWidget {
     return Column(
       children: modes.map((mode) {
         return Container(
-          margin: const EdgeInsets.only(bottom: 16),
-          child: Material(
-            color: mode['color'] as Color,
-            borderRadius: BorderRadius.circular(16),
-            child: InkWell(
-              onTap: () => context.go('/${mode['id']}-assist'),
-              borderRadius: BorderRadius.circular(16),
-              child: Container(
-                padding: const EdgeInsets.all(24),
-                height: 120,
-                child: Row(
-                  children: [
-                    Icon(
-                      mode['icon'] as IconData,
-                      size: 32,
-                      color: Colors.white,
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            mode['title'] as String,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
-                            ),
+          margin: const EdgeInsets.only(bottom: AppConstants.defaultSpacing),
+          child: AppCard(
+            backgroundColor: mode['color'] as Color,
+            borderRadius: 16,
+            onTap: () => context.go('/${mode['id']}-assist'),
+            padding: const EdgeInsets.all(AppConstants.defaultPadding),
+            child: SizedBox(
+              height: 120.0,
+              child: Row(
+                children: [
+                  Icon(
+                    mode['icon'] as IconData,
+                    size: AppConstants.largeIconSize,
+                    color: Colors.white,
+                  ),
+                  const SizedBox(width: AppConstants.defaultSpacing),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          mode['title'] as String,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            mode['description'] as String,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Colors.white,
-                              height: 1.4,
-                            ),
+                        ),
+                        const SizedBox(height: AppConstants.smallSpacing),
+                        Text(
+                          mode['description'] as String,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.white,
+                            height: 1.4,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -139,28 +143,28 @@ class HomeScreen extends StatelessWidget {
   Widget _buildQuickAccess(BuildContext context) {
     return Column(
       children: [
-        const Text(
-          'Quick Access',
-          style: TextStyle(
+        Text(
+          AppConstants.quickAccessText,
+          style: const TextStyle(
             fontSize: 16,
             color: AppTheme.textSecondary,
           ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppConstants.defaultSpacing),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             _buildQuickAccessButton(
               context,
-              'History',
+              AppConstants.historyTitle,
               Icons.history_outlined,
               () => context.go('/history'),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: AppConstants.defaultSpacing),
             _buildQuickAccessButton(
               context,
-              'Settings',
+              AppConstants.settingsTitle,
               Icons.settings_outlined,
               () => context.go('/settings'),
             ),
@@ -176,30 +180,25 @@ class HomeScreen extends StatelessWidget {
     IconData icon,
     VoidCallback onTap,
   ) {
-    return Material(
-      color: AppTheme.surfaceColor,
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 20, color: AppTheme.textPrimary),
-              const SizedBox(width: 8),
-              Text(
-                text,
-                style: const TextStyle(
-                  color: AppTheme.textPrimary,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
+    return AppCard(
+      backgroundColor: AppTheme.surfaceColor,
+      borderRadius: AppConstants.buttonBorderRadius,
+      onTap: onTap,
+      padding: const EdgeInsets.symmetric(horizontal: AppConstants.defaultPadding, vertical: 12),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: AppConstants.defaultIconSize, color: AppTheme.textPrimary),
+          const SizedBox(width: AppConstants.smallSpacing),
+          Text(
+            text,
+            style: const TextStyle(
+              color: AppTheme.textPrimary,
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

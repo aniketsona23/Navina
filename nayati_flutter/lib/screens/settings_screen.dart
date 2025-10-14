@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import '../widgets/common/index.dart';
+import '../constants/app_constants.dart';
 
+/// Settings screen for app configuration
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
@@ -9,167 +12,158 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  // Settings state
   bool _notificationsEnabled = true;
   bool _hapticFeedbackEnabled = true;
   bool _voiceGuidanceEnabled = true;
-  String _selectedLanguage = 'English';
-  double _fontSize = 16.0;
+  String _selectedLanguage = AppConstants.defaultLanguage;
+  double _fontSize = AppConstants.defaultFontSize;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
-      appBar: AppBar(
-        title: const Text('Settings'),
-        backgroundColor: AppTheme.primaryColor,
-        foregroundColor: Colors.white,
-      ),
+    return AppScaffold(
+      title: AppConstants.settingsTitle,
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(AppConstants.defaultPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSectionTitle('General'),
-            _buildSettingsCard([
-              _buildSwitchTile(
-                'Notifications',
-                'Receive alerts and updates',
-                Icons.notifications_outlined,
-                _notificationsEnabled,
-                (value) => setState(() => _notificationsEnabled = value!),
+            const SectionTitle('General'),
+            AppCard(
+              child: Column(
+                children: [
+                  AppSwitchTile(
+                    title: 'Notifications',
+                    subtitle: 'Receive alerts and updates',
+                    leadingIcon: Icons.notifications_outlined,
+                    value: _notificationsEnabled,
+                    onChanged: (value) => setState(() => _notificationsEnabled = value),
+                  ),
+                  const Divider(),
+                  AppSwitchTile(
+                    title: 'Haptic Feedback',
+                    subtitle: 'Vibration for interactions',
+                    leadingIcon: Icons.vibration,
+                    value: _hapticFeedbackEnabled,
+                    onChanged: (value) => setState(() => _hapticFeedbackEnabled = value),
+                  ),
+                ],
               ),
-              _buildDivider(),
-              _buildSwitchTile(
-                'Haptic Feedback',
-                'Vibration for interactions',
-                Icons.vibration,
-                _hapticFeedbackEnabled,
-                (value) => setState(() => _hapticFeedbackEnabled = value!),
-              ),
-            ]),
+            ),
             
-            const SizedBox(height: 24),
+            const SizedBox(height: AppConstants.defaultSpacing),
             
-            _buildSectionTitle('Accessibility'),
-            _buildSettingsCard([
-              _buildSwitchTile(
-                'Voice Guidance',
-                'Audio instructions for navigation',
-                Icons.record_voice_over,
-                _voiceGuidanceEnabled,
-                (value) => setState(() => _voiceGuidanceEnabled = value!),
+            const SectionTitle('Accessibility'),
+            AppCard(
+              child: Column(
+                children: [
+                  AppSwitchTile(
+                    title: 'Voice Guidance',
+                    subtitle: 'Audio instructions for navigation',
+                    leadingIcon: Icons.record_voice_over,
+                    value: _voiceGuidanceEnabled,
+                    onChanged: (value) => setState(() => _voiceGuidanceEnabled = value),
+                  ),
+                  const Divider(),
+                  _buildLanguageTile(),
+                  const Divider(),
+                  _buildFontSizeTile(),
+                ],
               ),
-              _buildDivider(),
-              _buildListTile(
-                'Language',
-                _selectedLanguage,
-                Icons.language,
-                () => _showLanguageDialog(),
-              ),
-              _buildDivider(),
-              _buildSliderTile(
-                'Font Size',
-                _fontSize,
-                (value) => setState(() => _fontSize = value),
-              ),
-            ]),
+            ),
             
-            const SizedBox(height: 24),
+            const SizedBox(height: AppConstants.defaultSpacing),
             
-            _buildSectionTitle('About'),
-            _buildSettingsCard([
-              _buildListTile(
-                'App Version',
-                '1.0.0',
-                Icons.info_outline,
-                null,
+            const SectionTitle('About'),
+            AppCard(
+              child: Column(
+                children: [
+                  _buildInfoTile(
+                    'App Version',
+                    '1.0.0',
+                    Icons.info_outline,
+                  ),
+                  const Divider(),
+                  _buildInfoTile(
+                    'Privacy Policy',
+                    '',
+                    Icons.privacy_tip_outlined,
+                    onTap: () {},
+                  ),
+                  const Divider(),
+                  _buildInfoTile(
+                    'Terms of Service',
+                    '',
+                    Icons.description_outlined,
+                    onTap: () {},
+                  ),
+                ],
               ),
-              _buildDivider(),
-              _buildListTile(
-                'Privacy Policy',
-                '',
-                Icons.privacy_tip_outlined,
-                () {},
-              ),
-              _buildDivider(),
-              _buildListTile(
-                'Terms of Service',
-                '',
-                Icons.description_outlined,
-                () {},
-              ),
-            ]),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSectionTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
-          color: AppTheme.textPrimary,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSettingsCard(List<Widget> children) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.borderColor),
-      ),
-      child: Column(children: children),
-    );
-  }
-
-  Widget _buildSwitchTile(
-    String title,
-    String subtitle,
-    IconData icon,
-    bool value,
-    ValueChanged<bool?> onChanged,
-  ) {
+  Widget _buildLanguageTile() {
     return ListTile(
-      leading: Icon(icon, color: AppTheme.primaryColor),
-      title: Text(
-        title,
-        style: const TextStyle(
+      leading: const Icon(
+        Icons.language,
+        color: AppTheme.textPrimary,
+        size: 24,
+      ),
+      title: const Text(
+        'Language',
+        style: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w500,
           color: AppTheme.textPrimary,
         ),
       ),
       subtitle: Text(
-        subtitle,
+        _selectedLanguage,
         style: const TextStyle(
           fontSize: 14,
           color: AppTheme.textSecondary,
         ),
       ),
-      trailing: Switch(
-        value: value,
-        onChanged: onChanged,
+      trailing: const Icon(
+        Icons.arrow_forward_ios,
+        size: 16,
+        color: AppTheme.textSecondary,
+      ),
+      onTap: _showLanguageDialog,
+    );
+  }
+
+  Widget _buildFontSizeTile() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: AppSlider(
+        label: 'Font Size',
+        value: _fontSize,
+        min: 12.0,
+        max: 24.0,
+        divisions: 12,
+        onChanged: (value) => setState(() => _fontSize = value),
         activeColor: AppTheme.primaryColor,
       ),
     );
   }
 
-  Widget _buildListTile(
+  Widget _buildInfoTile(
     String title,
     String subtitle,
-    IconData icon,
+    IconData icon, {
     VoidCallback? onTap,
-  ) {
+  }) {
     return ListTile(
-      leading: Icon(icon, color: AppTheme.primaryColor),
+      leading: Icon(
+        icon,
+        color: AppTheme.textPrimary,
+        size: 24,
+      ),
       title: Text(
         title,
         style: const TextStyle(
@@ -198,57 +192,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildSliderTile(
-    String title,
-    double value,
-    ValueChanged<double> onChanged,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: AppTheme.textPrimary,
-                ),
-              ),
-              Text(
-                '${value.round()}px',
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: AppTheme.textSecondary,
-                ),
-              ),
-            ],
-          ),
-          Slider(
-            value: value,
-            min: 12.0,
-            max: 24.0,
-            divisions: 12,
-            activeColor: AppTheme.primaryColor,
-            onChanged: onChanged,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDivider() {
-    return const Divider(
-      height: 1,
-      indent: 56,
-      color: AppTheme.borderColor,
-    );
-  }
-
   void _showLanguageDialog() {
     showDialog(
       context: context,
@@ -256,29 +199,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
         title: const Text('Select Language'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildLanguageOption('English', 'en'),
-            _buildLanguageOption('Spanish', 'es'),
-            _buildLanguageOption('French', 'fr'),
-            _buildLanguageOption('German', 'de'),
-          ],
+          children: AppConstants.supportedLanguages.map((language) {
+            return ListTile(
+              title: Text(language),
+              leading: Radio<String>(
+                value: language,
+                groupValue: _selectedLanguage,
+                onChanged: (value) {
+                  setState(() {
+                    _selectedLanguage = value!;
+                  });
+                  Navigator.of(context).pop();
+                },
+              ),
+            );
+          }).toList(),
         ),
       ),
-    );
-  }
-
-  Widget _buildLanguageOption(String language, String code) {
-    return ListTile(
-      title: Text(language),
-      trailing: _selectedLanguage == language
-          ? const Icon(Icons.check, color: AppTheme.primaryColor)
-          : null,
-      onTap: () {
-        setState(() {
-          _selectedLanguage = language;
-        });
-        Navigator.pop(context);
-      },
     );
   }
 }

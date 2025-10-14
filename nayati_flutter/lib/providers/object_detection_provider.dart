@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import '../services/api_service.dart';
+import '../utils/logger_util.dart';
 
 class DetectionResult {
   final String id;
@@ -50,7 +51,7 @@ class ObjectDetectionProvider extends ChangeNotifier {
       _error = null;
       notifyListeners();
 
-      print('🔍 Starting object detection for: $imagePath');
+      ObjectDetectionLogger.info('Starting object detection for: $imagePath');
       final startTime = DateTime.now();
       final result = await _apiService.detectObjects(imagePath);
       final endTime = DateTime.now();
@@ -58,24 +59,24 @@ class ObjectDetectionProvider extends ChangeNotifier {
       _processingTime = endTime.difference(startTime).inMilliseconds.toDouble();
       _lastDetectionTime = DateTime.now();
 
-      print('📊 Detection result: $result');
+      ObjectDetectionLogger.debug('Detection result: $result');
 
       if (result['success'] == true) {
         final detectionsList = result['detections'] as List<dynamic>? ?? [];
-        print('🎯 Found ${detectionsList.length} detections');
+        ObjectDetectionLogger.info('Found ${detectionsList.length} detections');
         
         _detections = detectionsList
             .map((item) => DetectionResult.fromJson(item as Map<String, dynamic>))
             .toList();
         
-        print('✅ Detections processed: ${_detections.length}');
+        ObjectDetectionLogger.info('Detections processed: ${_detections.length}');
       } else {
         _error = result['error'] ?? 'Detection failed';
-        print('❌ Detection failed: $_error');
+        ObjectDetectionLogger.error('Detection failed: $_error');
       }
     } catch (e) {
       _error = 'Failed to detect objects: $e';
-      print('💥 Detection error: $e');
+      ObjectDetectionLogger.error('Detection error: $e');
     } finally {
       _isDetecting = false;
       notifyListeners();
