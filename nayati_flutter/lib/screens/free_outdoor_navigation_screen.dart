@@ -643,7 +643,13 @@ class _FreeOutdoorNavigationScreenState extends State<FreeOutdoorNavigationScree
         foregroundColor: Colors.white,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
+          onPressed: () {
+            if (Navigator.canPop(context)) {
+              context.pop();
+            } else {
+              context.go('/');
+            }
+          },
         ),
       ),
       body: Stack(
