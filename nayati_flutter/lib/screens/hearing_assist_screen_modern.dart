@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'dart:async';
 import '../providers/speech_recognition_provider.dart';
 import '../providers/text_to_speech_provider.dart';
+import '../widgets/emergency_sos_button.dart';
 
 class HearingAssistScreenModern extends StatefulWidget {
   const HearingAssistScreenModern({super.key});
@@ -162,6 +163,7 @@ class _HearingAssistScreenModernState extends State<HearingAssistScreenModern> w
               );
             }).toList(),
           ),
+          const InlineSOSButton(),
         ],
       ),
       body: !_isInitialized

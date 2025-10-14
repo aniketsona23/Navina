@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../theme/app_theme.dart';
+import '../emergency_sos_button.dart';
 
 /// Common scaffold wrapper for all screens
 class AppScaffold extends StatelessWidget {
@@ -13,6 +14,7 @@ class AppScaffold extends StatelessWidget {
   final bool showBackButton;
   final bool centerTitle;
   final double? elevation;
+  final bool showSOSButton;
 
   const AppScaffold({
     super.key,
@@ -25,6 +27,7 @@ class AppScaffold extends StatelessWidget {
     this.showBackButton = true,
     this.centerTitle = true,
     this.elevation,
+    this.showSOSButton = true,
   });
 
   @override
@@ -49,7 +52,10 @@ class AppScaffold extends StatelessWidget {
               },
             )
           : null),
-        actions: actions,
+        actions: [
+          ...?actions,
+          if (showSOSButton) const InlineSOSButton(),
+        ],
       ),
       body: body,
     );

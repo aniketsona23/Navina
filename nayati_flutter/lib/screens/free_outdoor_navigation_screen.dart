@@ -7,6 +7,8 @@ import 'package:geocoding/geocoding.dart';
 import 'package:go_router/go_router.dart';
 import '../theme/app_theme.dart';
 import '../services/open_route_service.dart';
+import '../widgets/emergency_sos_button.dart';
+import '../utils/logger_util.dart';
 
 class FreeOutdoorNavigationScreen extends StatefulWidget {
   const FreeOutdoorNavigationScreen({super.key});
@@ -19,11 +21,10 @@ class _FreeOutdoorNavigationScreenState extends State<FreeOutdoorNavigationScree
   final MapController _mapController = MapController();
   Position? _currentPosition;
   LatLng? _destination;
-  List<Marker> _markers = [];
+  final List<Marker> _markers = [];
   List<Polyline> _polylines = [];
   bool _isNavigating = false;
   bool _isLoading = false;
-  bool _isLocationLoaded = false;
   String _destinationName = '';
   RouteResult? _currentRoute;
   final TextEditingController _searchController = TextEditingController();
@@ -99,7 +100,6 @@ class _FreeOutdoorNavigationScreenState extends State<FreeOutdoorNavigationScree
       setState(() {
         _currentPosition = position;
         _isLoading = false;
-        _isLocationLoaded = true;
       });
 
       // Move camera to current location
@@ -137,7 +137,7 @@ class _FreeOutdoorNavigationScreenState extends State<FreeOutdoorNavigationScree
                 border: Border.all(color: Colors.white, width: 3),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.blue.withOpacity(0.3),
+                    color: Colors.blue.withValues(alpha: 0.3),
                     blurRadius: 10,
                     spreadRadius: 2,
                   ),
@@ -187,7 +187,7 @@ class _FreeOutdoorNavigationScreenState extends State<FreeOutdoorNavigationScree
                 border: Border.all(color: Colors.white, width: 3),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.red.withOpacity(0.3),
+                    color: Colors.red.withValues(alpha: 0.3),
                     blurRadius: 10,
                     spreadRadius: 2,
                   ),
@@ -267,7 +267,7 @@ class _FreeOutdoorNavigationScreenState extends State<FreeOutdoorNavigationScree
         }
       }
     } catch (e) {
-      print('Error calculating route: $e');
+      NavigationLogger.error('Error calculating route: $e', e);
       // Fallback to mock route
       _calculateMockRoute();
     }
@@ -388,7 +388,7 @@ class _FreeOutdoorNavigationScreenState extends State<FreeOutdoorNavigationScree
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: AppTheme.mobilityAssistColor.withOpacity(0.1),
+                          color: AppTheme.mobilityAssistColor.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Row(
@@ -470,7 +470,7 @@ class _FreeOutdoorNavigationScreenState extends State<FreeOutdoorNavigationScree
                           _getInstructionIcon(instruction.instruction),
                           index == 0, // First instruction is current
                         );
-                      }).toList(),
+                      }),
                     ] else ...[
                       // Fallback instructions
                       _buildNavigationStep(
@@ -507,7 +507,7 @@ class _FreeOutdoorNavigationScreenState extends State<FreeOutdoorNavigationScree
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isCurrent ? AppTheme.mobilityAssistColor.withOpacity(0.1) : Colors.grey[50],
+        color: isCurrent ? AppTheme.mobilityAssistColor.withValues(alpha: 0.1) : Colors.grey[50],
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isCurrent ? AppTheme.mobilityAssistColor : Colors.grey[300]!,
@@ -651,6 +651,9 @@ class _FreeOutdoorNavigationScreenState extends State<FreeOutdoorNavigationScree
             }
           },
         ),
+        actions: const [
+          InlineSOSButton(),
+        ],
       ),
       body: Stack(
         children: [
@@ -697,7 +700,7 @@ class _FreeOutdoorNavigationScreenState extends State<FreeOutdoorNavigationScree
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -752,7 +755,7 @@ class _FreeOutdoorNavigationScreenState extends State<FreeOutdoorNavigationScree
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -792,7 +795,7 @@ class _FreeOutdoorNavigationScreenState extends State<FreeOutdoorNavigationScree
                                 const SizedBox(height: 4),
                                 Row(
                                   children: [
-                                    Icon(
+                                    const Icon(
                                       Icons.directions_walk,
                                       size: 14,
                                       color: AppTheme.textSecondary,
@@ -806,7 +809,7 @@ class _FreeOutdoorNavigationScreenState extends State<FreeOutdoorNavigationScree
                                       ),
                                     ),
                                     const SizedBox(width: 12),
-                                    Icon(
+                                    const Icon(
                                       Icons.timer,
                                       size: 14,
                                       color: AppTheme.textSecondary,
@@ -867,7 +870,7 @@ class _FreeOutdoorNavigationScreenState extends State<FreeOutdoorNavigationScree
               left: 0,
               right: 0,
               child: Container(
-                color: Colors.black.withOpacity(0.3),
+                color: Colors.black.withValues(alpha: 0.3),
                 padding: const EdgeInsets.all(16),
                 child: const Center(
                   child: Column(
@@ -899,7 +902,7 @@ class _FreeOutdoorNavigationScreenState extends State<FreeOutdoorNavigationScree
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.7),
+                  color: Colors.black.withValues(alpha: 0.7),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
@@ -934,7 +937,7 @@ class _FreeOutdoorNavigationScreenState extends State<FreeOutdoorNavigationScree
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.7),
+                color: Colors.black.withValues(alpha: 0.7),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: const Row(

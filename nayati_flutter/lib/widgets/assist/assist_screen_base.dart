@@ -281,15 +281,15 @@ mixin TranscriptMixin<T extends AssistScreenBase> on AssistScreenBaseState<T> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
+                          const Row(
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.mic,
                                 size: 16,
                                 color: Color(0xFFEA580C),
                               ),
-                              const SizedBox(width: 8),
-                              const Text(
+                              SizedBox(width: 8),
+                              Text(
                                 'Live transcription...',
                                 style: TextStyle(
                                   color: Color(0xFFEA580C),

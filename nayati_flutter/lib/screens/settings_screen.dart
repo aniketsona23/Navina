@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../widgets/common/index.dart';
 import '../widgets/backend_config_widget.dart';
+import '../widgets/emergency_contacts_widget.dart';
 import '../constants/app_constants.dart';
 
 /// Settings screen for app configuration
@@ -72,6 +73,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ],
               ),
             ),
+            
+            const SizedBox(height: AppConstants.defaultSpacing),
+            
+            const SectionTitle('Emergency Contacts'),
+            const EmergencyContactsWidget(),
             
             const SizedBox(height: AppConstants.defaultSpacing),
             

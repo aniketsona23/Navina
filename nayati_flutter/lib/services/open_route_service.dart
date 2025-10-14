@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
+import '../utils/logger_util.dart';
 
 class OpenRouteService {
   // You can get a free API key from https://openrouteservice.org/
@@ -41,11 +42,11 @@ class OpenRouteService {
         final data = jsonDecode(response.body);
         return _parseRouteResult(data);
       } else {
-        print('OpenRouteService error: ${response.statusCode} - ${response.body}');
+        NavigationLogger.error('OpenRouteService error: ${response.statusCode} - ${response.body}');
         return _getMockRoute(start, end);
       }
     } catch (e) {
-      print('Error getting directions: $e');
+      NavigationLogger.error('Error getting directions: $e');
       return _getMockRoute(start, end);
     }
   }
@@ -96,7 +97,7 @@ class OpenRouteService {
         instructions: instructions,
       );
     } catch (e) {
-      print('Error parsing route result: $e');
+      NavigationLogger.error('Error parsing route result: $e');
       return null;
     }
   }

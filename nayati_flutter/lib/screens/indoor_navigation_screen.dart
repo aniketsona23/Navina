@@ -85,8 +85,8 @@ class _IndoorNavigationScreenState extends State<IndoorNavigationScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppTheme.mobilityAssistColor.withOpacity(0.1),
-        border: Border(
+        color: AppTheme.mobilityAssistColor.withValues(alpha: 0.1),
+        border: const Border(
           bottom: BorderSide(color: AppTheme.borderColor),
         ),
       ),
@@ -140,7 +140,7 @@ class _IndoorNavigationScreenState extends State<IndoorNavigationScreen> {
           LinearProgressIndicator(
             value: provider.progressPercentage,
             backgroundColor: AppTheme.borderColor,
-            valueColor: AlwaysStoppedAnimation<Color>(AppTheme.mobilityAssistColor),
+            valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.mobilityAssistColor),
           ),
         ],
       ),
@@ -260,7 +260,7 @@ class _IndoorNavigationScreenState extends State<IndoorNavigationScreen> {
   Widget _buildNavigationControls(IndoorNavigationProvider provider) {
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: AppTheme.surfaceColor,
         border: Border(
           top: BorderSide(color: AppTheme.borderColor),
@@ -275,7 +275,7 @@ class _IndoorNavigationScreenState extends State<IndoorNavigationScreen> {
               label: const Text('Previous'),
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppTheme.mobilityAssistColor,
-                side: BorderSide(color: AppTheme.mobilityAssistColor),
+                side: const BorderSide(color: AppTheme.mobilityAssistColor),
                 padding: const EdgeInsets.symmetric(vertical: 12),
               ),
             ),
@@ -298,7 +298,7 @@ class _IndoorNavigationScreenState extends State<IndoorNavigationScreen> {
             onPressed: () => provider.speakCurrentInstruction(),
             icon: const Icon(Icons.volume_up),
             style: IconButton.styleFrom(
-              backgroundColor: AppTheme.mobilityAssistColor.withOpacity(0.1),
+              backgroundColor: AppTheme.mobilityAssistColor.withValues(alpha: 0.1),
               foregroundColor: AppTheme.mobilityAssistColor,
             ),
           ),
@@ -307,7 +307,7 @@ class _IndoorNavigationScreenState extends State<IndoorNavigationScreen> {
             onPressed: () => provider.stopNavigation(),
             icon: const Icon(Icons.stop),
             style: IconButton.styleFrom(
-              backgroundColor: Colors.red.withOpacity(0.1),
+              backgroundColor: Colors.red.withValues(alpha: 0.1),
               foregroundColor: Colors.red,
             ),
           ),
@@ -356,7 +356,7 @@ class _IndoorNavigationScreenState extends State<IndoorNavigationScreen> {
             margin: const EdgeInsets.only(bottom: 12),
             child: Material(
               color: _selectedBuilding == buildingId
-                  ? AppTheme.mobilityAssistColor.withOpacity(0.1)
+                  ? AppTheme.mobilityAssistColor.withValues(alpha: 0.1)
                   : Colors.white,
               borderRadius: BorderRadius.circular(12),
               child: InkWell(
@@ -412,7 +412,7 @@ class _IndoorNavigationScreenState extends State<IndoorNavigationScreen> {
               ),
             ),
           );
-        }).toList(),
+        }),
       ],
     );
   }
@@ -436,7 +436,7 @@ class _IndoorNavigationScreenState extends State<IndoorNavigationScreen> {
             margin: const EdgeInsets.only(bottom: 12),
             child: Material(
               color: _selectedFloor == floorId
-                  ? AppTheme.mobilityAssistColor.withOpacity(0.1)
+                  ? AppTheme.mobilityAssistColor.withValues(alpha: 0.1)
                   : Colors.white,
               borderRadius: BorderRadius.circular(12),
               child: InkWell(
@@ -491,7 +491,7 @@ class _IndoorNavigationScreenState extends State<IndoorNavigationScreen> {
               ),
             ),
           );
-        }).toList(),
+        }),
       ],
     );
   }
@@ -554,7 +554,7 @@ class _IndoorNavigationScreenState extends State<IndoorNavigationScreen> {
                       margin: const EdgeInsets.only(bottom: 8),
                       child: Material(
                         color: _selectedStartRoom == roomId
-                            ? AppTheme.mobilityAssistColor.withOpacity(0.1)
+                            ? AppTheme.mobilityAssistColor.withValues(alpha: 0.1)
                             : Colors.white,
                         borderRadius: BorderRadius.circular(8),
                         child: InkWell(
@@ -601,7 +601,7 @@ class _IndoorNavigationScreenState extends State<IndoorNavigationScreen> {
                         ),
                       ),
                     );
-                  }).toList(),
+                  }),
                 ],
               ),
             ),
@@ -631,7 +631,7 @@ class _IndoorNavigationScreenState extends State<IndoorNavigationScreen> {
                       margin: const EdgeInsets.only(bottom: 8),
                       child: Material(
                         color: _selectedEndRoom == roomId
-                            ? AppTheme.mobilityAssistColor.withOpacity(0.1)
+                            ? AppTheme.mobilityAssistColor.withValues(alpha: 0.1)
                             : Colors.white,
                         borderRadius: BorderRadius.circular(8),
                         child: InkWell(
@@ -678,7 +678,7 @@ class _IndoorNavigationScreenState extends State<IndoorNavigationScreen> {
                         ),
                       ),
                     );
-                  }).toList(),
+                  }),
                 ],
               ),
             ),
@@ -713,9 +713,9 @@ class _IndoorNavigationScreenState extends State<IndoorNavigationScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.red.withOpacity(0.1),
+        color: Colors.red.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.red.withOpacity(0.3)),
+        border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [

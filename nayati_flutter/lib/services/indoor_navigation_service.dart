@@ -1,6 +1,4 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -344,8 +342,8 @@ class IndoorNavigationService {
   ) {
     final currentName = currentRoom['name'];
     final nextName = nextRoom['name'];
-    final distance = connection['distance'];
-    final accessible = connection['accessible'];
+    // final distance = connection['distance'];
+    // final accessible = connection['accessible'];
 
     if (isFirstStep) {
       return 'Start from $currentName. Head towards $nextName.';

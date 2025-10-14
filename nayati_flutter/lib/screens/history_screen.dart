@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:nayati_flutter/widgets/common/app_scaffold.dart';
 import 'package:provider/provider.dart';
 import '../providers/history_provider.dart';
 import '../theme/app_theme.dart';
-import '../widgets/common/index.dart';
-import '../constants/app_constants.dart';
 
 /// History screen displaying past assistance sessions
 class HistoryScreen extends StatefulWidget {
@@ -20,10 +19,10 @@ class _HistoryScreenState extends State<HistoryScreen> with TickerProviderStateM
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
-      duration: AppConstants.defaultAnimation,
-      vsync: this,
-    );
+      _animationController = AnimationController(
+        duration: const Duration(milliseconds: 300),
+        vsync: this,
+      );
     _slideAnimation = Tween<double>(
       begin: 0.0,
       end: -300.0,
@@ -143,7 +142,7 @@ class _HistoryScreenState extends State<HistoryScreen> with TickerProviderStateM
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      title: AppConstants.historyTitle,
+      title: 'History',
       actions: [
         TextButton(
           onPressed: _handleClearAll,

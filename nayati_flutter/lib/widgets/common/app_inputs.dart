@@ -141,7 +141,7 @@ class AppSwitchTile extends StatelessWidget {
       trailing: Switch(
         value: value,
         onChanged: onChanged,
-        activeColor: activeColor ?? AppTheme.primaryColor,
+        activeThumbColor: activeColor ?? AppTheme.primaryColor,
         inactiveThumbColor: inactiveColor ?? AppTheme.mediumGray,
         inactiveTrackColor: AppTheme.lightGray,
       ),

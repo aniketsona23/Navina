@@ -5,6 +5,7 @@ import 'package:camera/camera.dart';
 import 'dart:async';
 import '../providers/object_detection_provider.dart';
 import '../utils/logger_util.dart';
+import '../widgets/emergency_sos_button.dart';
 
 class VisualAssistScreenModern extends StatefulWidget {
   const VisualAssistScreenModern({super.key});
@@ -226,6 +227,7 @@ class _VisualAssistScreenModernState extends State<VisualAssistScreenModern> wit
               onPressed: _toggleFullscreen,
               tooltip: 'Fullscreen',
             ),
+          const InlineSOSButton(),
         ],
       ),
       body: SingleChildScrollView(
@@ -294,9 +296,14 @@ class _VisualAssistScreenModernState extends State<VisualAssistScreenModern> wit
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-                      onPressed: _toggleFullscreen,
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                          onPressed: _toggleFullscreen,
+                        ),
+                        const InlineSOSButton(),
+                      ],
                     ),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),

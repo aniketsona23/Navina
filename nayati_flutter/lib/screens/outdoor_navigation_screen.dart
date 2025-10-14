@@ -17,9 +17,8 @@ class _OutdoorNavigationScreenState extends State<OutdoorNavigationScreen> {
   GoogleMapController? _mapController;
   Position? _currentPosition;
   LatLng? _destination;
-  Set<Marker> _markers = {};
-  Set<Polyline> _polylines = {};
-  List<LatLng> _routeCoordinates = [];
+  final Set<Marker> _markers = {};
+  final Set<Polyline> _polylines = {};
   bool _isNavigating = false;
   bool _isLoading = false;
   bool _isLocationLoaded = false;
@@ -91,7 +90,9 @@ class _OutdoorNavigationScreenState extends State<OutdoorNavigationScreen> {
 
       // Get current position
       Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+        ),
       );
 
       setState(() {
@@ -216,14 +217,13 @@ class _OutdoorNavigationScreenState extends State<OutdoorNavigationScreen> {
     ];
 
     setState(() {
-      _routeCoordinates = mockRoute;
       _polylines.add(
         Polyline(
           polylineId: const PolylineId('route'),
           points: mockRoute,
           color: AppTheme.mobilityAssistColor,
           width: 5,
-          patterns: [],
+          patterns: const [],
         ),
       );
     });
@@ -352,7 +352,7 @@ class _OutdoorNavigationScreenState extends State<OutdoorNavigationScreen> {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isCurrent ? AppTheme.mobilityAssistColor.withOpacity(0.1) : Colors.grey[50],
+        color: isCurrent ? AppTheme.mobilityAssistColor.withValues(alpha: 0.1) : Colors.grey[50],
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isCurrent ? AppTheme.mobilityAssistColor : Colors.grey[300]!,
@@ -497,7 +497,7 @@ class _OutdoorNavigationScreenState extends State<OutdoorNavigationScreen> {
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -552,7 +552,7 @@ class _OutdoorNavigationScreenState extends State<OutdoorNavigationScreen> {
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -633,7 +633,7 @@ class _OutdoorNavigationScreenState extends State<OutdoorNavigationScreen> {
               left: 0,
               right: 0,
               child: Container(
-                color: Colors.black.withOpacity(0.3),
+                color: Colors.black.withValues(alpha: 0.3),
                 padding: const EdgeInsets.all(16),
                 child: const Center(
                   child: Column(
@@ -665,7 +665,7 @@ class _OutdoorNavigationScreenState extends State<OutdoorNavigationScreen> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.7),
+                  color: Colors.black.withValues(alpha: 0.7),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(

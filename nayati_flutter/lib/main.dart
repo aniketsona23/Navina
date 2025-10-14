@@ -11,9 +11,9 @@ import 'providers/text_to_speech_provider.dart';
 import 'providers/history_provider.dart';
 import 'services/config_service.dart';
 import 'providers/indoor_navigation_provider.dart';
+import 'widgets/emergency_sos_button.dart';
 import 'screens/home_screen.dart';
 import 'screens/history_screen.dart';
-import 'screens/map_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/visual_assist_screen.dart';
 import 'screens/hearing_assist_screen.dart';
@@ -38,6 +38,15 @@ Future<void> _requestPermissions() async {
     Permission.camera,
     Permission.microphone,
     Permission.storage,
+    Permission.phone,
+    Permission.sms,
+    Permission.location,
+  ].request();
+  
+  // Request additional SMS permissions for telephony package
+  await [
+    Permission.sms,
+    Permission.notification,
   ].request();
 }
 
@@ -128,6 +137,8 @@ class MainNavigationShell extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: child,
+      floatingActionButton: const EmergencySOSButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _getCurrentIndex(context),

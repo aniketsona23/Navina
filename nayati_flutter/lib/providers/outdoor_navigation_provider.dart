@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:geocoding/geocoding.dart';
 import '../services/outdoor_navigation_service.dart';
 
 class OutdoorNavigationProvider extends ChangeNotifier {
