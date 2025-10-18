@@ -232,6 +232,32 @@ class TextToSpeechProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Maps language names to their corresponding TTS language codes
+  String getLanguageCodeForLanguage(String language) {
+    switch (language.toLowerCase()) {
+      case 'english':
+        return 'en-US';
+      case 'spanish':
+        return 'es-ES';
+      case 'french':
+        return 'fr-FR';
+      case 'german':
+        return 'de-DE';
+      case 'italian':
+        return 'it-IT';
+      case 'hindi':
+        return 'hi-IN';
+      default:
+        return 'en-US';
+    }
+  }
+
+  /// Sets the language for text-to-speech
+  Future<void> setLanguageByName(String language) async {
+    final languageCode = getLanguageCodeForLanguage(language);
+    await setLanguage(languageCode);
+  }
+
   @override
   void dispose() {
     _flutterTts.stop();

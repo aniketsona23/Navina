@@ -66,16 +66,16 @@ class _EmergencyContactsWidgetState extends State<EmergencyContactsWidget> {
   }
 
   Future<void> _addContact() async {
-    final result = await _showContactDialog();
-    if (result != null) {
-      try {
+    try {
+      final result = await _showContactDialog();
+      if (result != null) {
         await _database.insertEmergencyContact(result);
         await _loadContacts();
         _showSuccessSnackBar('Emergency contact added successfully');
-      } catch (e) {
-        AppLogger.error('Error adding emergency contact: $e');
-        _showErrorSnackBar('Failed to add emergency contact');
       }
+    } catch (e) {
+      AppLogger.error('Error adding emergency contact: $e');
+      _showErrorSnackBar('Failed to add emergency contact');
     }
   }
 
@@ -125,35 +125,43 @@ class _EmergencyContactsWidgetState extends State<EmergencyContactsWidget> {
     TextEditingController relationshipController,
     ValueNotifier<bool> isPrimaryController,
     model.EmergencyContact? contact,
-    EmergencyContactsDatabase database,
-  ) async {
+    EmergencyContactsDatabase database, {
+    VoidCallback? onDispose,
+  }) async {
     if (formKey.currentState!.validate()) {
-      // Check for duplicate phone number
-      final phoneExists = await database.phoneNumberExists(
-        phoneController.text.trim(),
-        excludeId: contact?.id,
-      );
-      
-      if (phoneExists) {
-        _showErrorSnackBar('This phone number is already in use');
-        return;
-      }
+      try {
+        // Check for duplicate phone number
+        final phoneExists = await database.phoneNumberExists(
+          phoneController.text.trim(),
+          excludeId: contact?.id,
+        );
+        
+        if (phoneExists) {
+          _showErrorSnackBar('This phone number is already in use');
+          return;
+        }
 
-      final now = DateTime.now();
-      final newContact = model.EmergencyContact(
-        id: contact?.id,
-        name: nameController.text.trim(),
-        phoneNumber: phoneController.text.trim(),
-        relationship: relationshipController.text.trim().isEmpty 
-            ? null 
-            : relationshipController.text.trim(),
-        isPrimary: isPrimaryController.value,
-        createdAt: contact?.createdAt ?? now,
-        updatedAt: now,
-      );
+        final now = DateTime.now();
+        final newContact = model.EmergencyContact(
+          id: contact?.id,
+          name: nameController.text.trim(),
+          phoneNumber: phoneController.text.trim(),
+          relationship: relationshipController.text.trim().isEmpty 
+              ? null 
+              : relationshipController.text.trim(),
+          isPrimary: isPrimaryController.value,
+          createdAt: contact?.createdAt ?? now,
+          updatedAt: now,
+        );
 
-      if (mounted) {
-        Navigator.of(context).pop(newContact);
+        // Close dialog and return the contact
+        onDispose?.call();
+        if (mounted && Navigator.of(context).canPop()) {
+          Navigator.of(context).pop(newContact);
+        }
+      } catch (e) {
+        AppLogger.error('Error in form submission: $e');
+        _showErrorSnackBar('An error occurred while processing the form');
       }
     }
   }
@@ -166,9 +174,18 @@ class _EmergencyContactsWidgetState extends State<EmergencyContactsWidget> {
 
     final formKey = GlobalKey<FormState>();
 
+    // Ensure controllers are disposed when dialog closes
+    void disposeControllers() {
+      nameController.dispose();
+      phoneController.dispose();
+      relationshipController.dispose();
+      isPrimaryController.dispose();
+    }
+
     return showDialog<model.EmergencyContact>(
       context: context,
-      builder: (context) => AlertDialog(
+      barrierDismissible: false, // Prevent dismissing by tapping outside
+      builder: (dialogContext) => AlertDialog(
         title: Text(contact == null ? 'Add Emergency Contact' : 'Edit Emergency Contact'),
         content: Form(
           key: formKey,
@@ -236,20 +253,35 @@ class _EmergencyContactsWidgetState extends State<EmergencyContactsWidget> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () {
+              disposeControllers();
+              if (Navigator.of(dialogContext).canPop()) {
+                Navigator.of(dialogContext).pop();
+              }
+            },
             child: const Text('Cancel'),
           ),
           ElevatedButton(
-            onPressed: () {
-              _handleFormSubmission(
-                formKey,
-                nameController,
-                phoneController,
-                relationshipController,
-                isPrimaryController,
-                contact,
-                _database,
-              );
+            onPressed: () async {
+              try {
+                await _handleFormSubmission(
+                  formKey,
+                  nameController,
+                  phoneController,
+                  relationshipController,
+                  isPrimaryController,
+                  contact,
+                  _database,
+                  onDispose: disposeControllers,
+                );
+              } catch (e) {
+                AppLogger.error('Error in dialog form submission: $e');
+                disposeControllers();
+                if (Navigator.of(dialogContext).canPop()) {
+                  Navigator.of(dialogContext).pop();
+                }
+                _showErrorSnackBar('Failed to process form');
+              }
             },
             child: Text(contact == null ? 'Add' : 'Update'),
           ),

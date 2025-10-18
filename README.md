@@ -1,294 +1,194 @@
 # Navina - Accessibility Assistant App
 
-
-Navina is a comprehensive accessibility assistant application that provides visual, hearing, and mobility assistance features. The project consists of a React Native Expo frontend (Nayati) and a Django REST API backend (a11ypal_backend).
+Navina is a comprehensive accessibility assistant that provides visual, hearing, and mobility assistance features. The project now uses a Flutter frontend (nayati_flutter) with a Django REST API backend (a11ypal_backend).
 
 ## Project Structure
 
 ```
 Navina/
-├── Nayati/                    # React Native Expo frontend
-│   ├── app/                   # App screens and navigation
-│   ├── components/            # Reusable UI components
-│   ├── services/              # API communication
-│   ├── hooks/                 # Custom React hooks
-│   └── types/                 # TypeScript type definitions
-└── a11ypal_backend/           # Django REST API backend
-    ├── visual_assist/         # Visual assistance features
-    ├── hearing_assist/        # Hearing assistance features
-    ├── mobility_assist/       # Mobility assistance features
-    ├── users/                 # User management
-    ├── history/               # Activity history tracking
-    └── services/              # ML/AI services
+├── nayati_flutter/             # Flutter mobile app (Android/iOS/Web)
+│   ├── lib/                    # Dart source (screens, providers, services)
+│   ├── android/                # Android project
+│   ├── ios/                    # iOS project
+│   └── pubspec.yaml            # Flutter dependencies
+└── a11ypal_backend/            # Django REST API backend
+    ├── a11ypal_backend/        # Project config (settings, urls, health)
+    ├── visual_assist/          # Visual assistance features
+    ├── hearing_assist/         # Hearing assistance features
+    ├── mobility_assist/        # Mobility assistance features
++    ├── history/               # Activity history tracking
+    ├── users/                  # User management
+    ├── services/               # ML/AI services (YOLOv5, STT)
+    ├── requirements.txt        # Python dependencies
+    └── manage.py               # Django entry point
 ```
 
 ## Features
 
 ### Visual Assist
-- **Object Detection**: Real-time object recognition using YOLOv5
-- **Text Recognition**: OCR for reading text from images
-- **Scene Description**: AI-powered scene analysis
-- **Color Analysis**: Color identification and description
+- Object detection (YOLOv5)
+- Text recognition (OCR)
+- Scene description
+- Color analysis
 
 ### Hearing Assist
-- **Live Speech-to-Text**: Real-time audio recording and transcription using Python STT libraries
-- **Audio Recording**: High-quality audio capture with pause/resume functionality
-- **Transcription History**: View and manage previous transcriptions with confidence scores
-- **Sound Alerts**: Visual notifications for important sounds
-- **Audio Processing**: Sound analysis and categorization
+- Live speech-to-text transcription
+- Audio recording with pause/resume
+- Transcription history with confidence scores
+- Sound analysis and categorization
 
 ### Mobility Assist
-- **Navigation Guidance**: Voice-guided navigation assistance
-- **Obstacle Detection**: Real-time obstacle identification
-- **Route Planning**: Accessible route recommendations
+- Indoor/outdoor navigation guidance
+- Obstacle reporting
+- Accessible route planning
 
 ## Prerequisites
 
-### For Nayati (React Native Expo)
+### Flutter (nayati_flutter)
+- Flutter SDK 3.4.4 or higher (includes Dart SDK)
+- Android Studio and Android SDK (for Android builds)
+- Xcode (for iOS builds on macOS)
 
-1. **Node.js** (v18 or higher)
-   ```bash
-   # Download from https://nodejs.org/
-   ```
-
-2. **Expo CLI**
-   ```bash
-   npm install -g @expo/cli
-   ```
-
-3. **Expo Go App** (for mobile testing)
-   - iOS: Download from App Store
-   - Android: Download from Google Play Store
-
-4. **Development Tools** (for building native apps)
-   - **Android**: Android Studio with Android SDK
-   - **iOS**: Xcode (macOS only)
-
-### For a11ypal_backend (Django)
-
-1. **Python** (v3.8 or higher)
-   ```bash
-   # Download from https://python.org/
-   ```
-
-2. **pip** (Python package manager)
-   ```bash
-   # Usually comes with Python
-   ```
-
-3. **Virtual Environment** (recommended)
-   ```bash
-   pip install virtualenv
-   ```
+### Backend (a11ypal_backend)
+- Python 3.8+
+- pip
+- Recommended: virtual environment
 
 ## Installation & Setup
 
 ### Backend Setup (Django)
 
-1. **Navigate to backend directory**
-   ```bash
-   cd a11ypal_backend
-   ```
+1) Navigate to backend directory
+```bat
+cd a11ypal_backend
+```
 
-2. **Create and activate virtual environment**
-   ```bash
-   # Create virtual environment
-   python -m venv venv
+2) Create and activate a virtual environment (Windows cmd)
+```bat
+python -m venv .venv
+.venv\Scripts\activate
+```
 
-   # Activate virtual environment
-   # Windows:
-   venv\Scripts\activate
-   # macOS/Linux:
-   source venv/bin/activate
-   ```
+3) Install dependencies
+```bat
+pip install -r requirements.txt
+```
 
-3. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
+Notes for audio/STT on Windows: if PyAudio fails to install
+```bat
+pip install pipwin
+pipwin install pyaudio
+```
 
-   **Note**: For speech-to-text functionality, you may need to install additional system dependencies:
-   
-   **Ubuntu/Debian:**
-   ```bash
-   sudo apt-get install portaudio19-dev python3-pyaudio
-   ```
-   
-   **macOS:**
-   ```bash
-   brew install portaudio
-   ```
-   
-   **Windows:**
-   ```bash
-   # PyAudio is usually installed automatically, but if you encounter issues:
-   pip install pipwin
-   pipwin install pyaudio
-   ```
+4) Apply migrations and run
+```bat
+python manage.py migrate
+python manage.py runserver
+```
 
-4. **Run database migrations**
-   ```bash
-   python manage.py migrate
-   ```
+The backend will be available at http://localhost:8000/ (health check at /api/health/).
 
-5. **Create superuser** (optional)
-   ```bash
-   python manage.py createsuperuser
-   ```
+### Frontend Setup (Flutter)
 
-6. **Start the development server**
-   ```bash
-   python manage.py runserver
-   ```
-   
-   The backend will be available at `http://localhost:8000`
+1) Navigate to app folder
+```bat
+cd nayati_flutter
+```
 
-### Frontend Setup (React Native Expo)
+2) Install Flutter packages
+```bat
+flutter pub get
+```
 
-1. **Navigate to frontend directory**
-   ```bash
-   cd Nayati
-   ```
+3) Configure backend URL (pick one)
+- In-app: Settings → Backend Configuration
+- Via flag at run time:
+```bat
+flutter run --dart-define=BACKEND_URL=http://YOUR_IP:8000/api
+```
+Tip: On Android emulator you can use 10.0.2.2 as the host (http://10.0.2.2:8000/api). For a physical device, use your machine's LAN IP and ensure both are on the same network.
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
+4) Run the app
+```bat
+flutter run
+```
 
-3. **Update API configuration**
-   - Open `services/api.ts`
-   - Update `API_BASE_URL` with your computer's IP address
-   - Find your IP with: `ipconfig` (Windows) or `ifconfig` (Mac/Linux)
+More Flutter setup details and platform-specific guides are in `nayati_flutter/README.md` and the docs in that folder (e.g., INSTALLATION.md, GOOGLE_MAPS_SETUP_GUIDE.md, OUTDOOR_NAVIGATION_GUIDE.md, DIRECTIONS_GUIDE.md).
 
-4. **Start the development server**
-   ```bash
-   npm start
-   # or
-   expo start
-   ```
+## Running the Application (Dev)
 
-## Running the Application
+1) Start backend
+```bat
+cd a11ypal_backend
+python manage.py runserver
+```
 
-### Development Mode
+2) Start Flutter app
+```bat
+cd nayati_flutter
+flutter run
+```
 
-1. **Start the backend server**
-   ```bash
-   cd a11ypal_backend
-   python manage.py runserver
-   ```
+Optional (Android physical device) to reach localhost backend:
+```bat
+adb reverse tcp:8000 tcp:8000
+```
 
-2. **Start the frontend development server**
-   ```bash
-   cd Nayati
-   npm start
-   ```
+## API Overview
 
-3. **Run on device/simulator**
-   - **Mobile**: Scan QR code with Expo Go app
-   - **Android Emulator**: Press `a` in terminal
-   - **iOS Simulator**: Press `i` in terminal (macOS only)
-   - **Web**: Press `w` in terminal
+Base URL: http://HOST:8000/api
 
-### Production Build
+Health
+- GET /api/health/
 
-1. **Build for Android**
-   ```bash
-   cd Nayati
-   expo build:android
-   ```
+Visual Assist
+- POST /api/visual-assist/analyze/
+- POST /api/visual-assist/extract-text/
+- POST /api/visual-assist/detect-objects/ (see also detect-objects-realtime/test/simple)
+- GET  /api/visual-assist/analyses/
+- GET  /api/visual-assist/stats/
 
-2. **Build for iOS**
-   ```bash
-   cd Nayati
-   expo build:ios
-   ```
+Hearing Assist
+- POST /api/hearing-assist/transcribe/
+- GET  /api/hearing-assist/speech-to-text/
+- GET  /api/hearing-assist/stats/
 
-## Code Structure Overview
+Mobility Assist
+- POST /api/mobility-assist/update-location/
+- GET  /api/mobility-assist/nearby-accessible/
+- POST /api/mobility-assist/create-route/
+- POST /api/mobility-assist/report-obstacle/
+- GET  /api/mobility-assist/emergency-contacts/
+- POST /api/mobility-assist/create-emergency-alert/
+- GET  /api/mobility-assist/stats/
 
-### Frontend (Nayati)
+History & Analytics
+- POST /api/history/log-activity/
+- GET  /api/history/dashboard/
+- GET  /api/history/feature-analytics/
+- GET  /api/history/error-analytics/
 
-- **`app/`**: Contains all screens and navigation structure
-  - `(tabs)/`: Tab-based navigation screens
-  - `_layout.tsx`: Root layout configuration
-- **`components/`**: Reusable UI components
-  - `HomeScreen.tsx`: Main dashboard with feature selection
-  - `VisualAssistScreen.tsx`: Object detection and text recognition
-  - `HearingAssistScreen.tsx`: Audio processing and transcription
-  - `MobilityAssistScreen.tsx`: Navigation and obstacle detection
-  - `ui/`: Custom UI components (Button, Card, Input, etc.)
-- **`services/`**: API communication layer
-  - `api.ts`: Main API client configuration
-  - `debugApi.ts`: Debug API utilities
-- **`hooks/`**: Custom React hooks
-  - `useObjectDetection.ts`: Object detection logic
-- **`types/`**: TypeScript type definitions
-
-### Backend (a11ypal_backend)
-
-- **`visual_assist/`**: Visual assistance API endpoints
-  - Object detection, text recognition, scene analysis
-- **`hearing_assist/`**: Audio processing endpoints
-  - Speech-to-text, sound analysis
-- **`mobility_assist/`**: Navigation and mobility features
-  - Route planning, obstacle detection
-- **`users/`**: User authentication and management
-- **`history/`**: Activity tracking and history
-- **`services/`**: ML/AI service implementations
-  - `object_detection_service.py`: YOLOv5 integration
-  - `yolov5_detection_service.py`: Object detection logic
-
-## API Endpoints
-
-### Visual Assist
-- `POST /api/visual-assist/analyze/` - Analyze image for objects and text
-- `GET /api/visual-assist/history/` - Get analysis history
-
-### Hearing Assist
-- `POST /api/hearing-assist/transcribe/` - Transcribe audio file to text
-- `GET /api/hearing-assist/speech-to-text/` - Get transcription history
-- `GET /api/hearing-assist/speech-to-text/{id}/` - Get specific transcription
-- `DELETE /api/hearing-assist/speech-to-text/{id}/` - Delete transcription
-- `GET /api/hearing-assist/stats/` - Get hearing assist statistics
-
-### Mobility Assist
-- `POST /api/mobility-assist/navigate/` - Get navigation guidance
-- `GET /api/mobility-assist/history/` - Get navigation history
+For a complete list and details, see the app-level READMEs inside `a11ypal_backend/`.
 
 ## Troubleshooting
 
-### Common Issues
+Backend
+- Ensure the virtual environment is activated
+- If torch/ultralytics install slowly, consider using a Python environment manager or a prebuilt wheel
+- If PyAudio fails on Windows, use pipwin as shown above
 
-1. **API Connection Issues**
-   - Ensure backend is running on correct port (8000)
-   - Update IP address in `services/api.ts`
-   - Check firewall settings
-
-2. **Expo Development Issues**
-   - Clear Expo cache: `expo start -c`
-   - Restart Metro bundler: `npx react-native start --reset-cache`
-
-3. **Python/Django Issues**
-   - Ensure virtual environment is activated
-   - Check Python version compatibility
-   - Run `pip install --upgrade pip`
-
-4. **Camera Permissions**
-   - Ensure camera permissions are granted on device
-   - Check app.json for proper permission configuration
-
-5. **Expo/React Native Issues**
-   - **Worklets Error**: Run `npx expo install react-native-reanimated@3.16.1`
-   - **Navigation Error**: Ensure NavigationProvider is properly set up in _layout.tsx
-   - **Deprecation Warnings**: Update to latest compatible versions
-   - **Clear Cache**: Run `npx expo start --clear` to clear Metro cache
-   - **Package Not Found**: If you get "No matching version found", try removing the package from package.json and reinstalling
+Flutter
+- Run `flutter doctor` and resolve any issues reported
+- If build issues occur, try `flutter clean` then `flutter pub get`
+- Camera/mic permissions: ensure AndroidManifest.xml and iOS Info.plist contain required permissions
+- On an emulator, use 10.0.2.2 to access the host machine (not localhost)
 
 ## Contributing
 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Test thoroughly
+4. Test thoroughly (backend and Flutter)
 5. Submit a pull request
 
 ## License

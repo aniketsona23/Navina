@@ -6,28 +6,51 @@ import 'config_service.dart';
 class ApiService {
   static const int timeout = 30000;
 
-  late final Dio _dio;
+  Dio? _dio;
+  bool _isInitialized = false;
 
   ApiService() {
     _initializeDio();
   }
   
   Future<void> _initializeDio() async {
-    final baseUrl = await ConfigService.getBackendUrl();
-    _dio = Dio(BaseOptions(
-      baseUrl: baseUrl,
-      connectTimeout: const Duration(milliseconds: timeout),
-      receiveTimeout: const Duration(milliseconds: timeout),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    ));
-    
-    _dio.interceptors.add(LogInterceptor(
-      requestBody: true,
-      responseBody: true,
-      logPrint: (obj) => AppLogger.debug('API: $obj'),
-    ));
+    try {
+      final baseUrl = await ConfigService.getBackendUrl();
+      AppLogger.info('Initializing API Service with URL: $baseUrl');
+      
+      // Validate URL format
+      final uri = Uri.parse(baseUrl);
+      AppLogger.debug('Parsed URI: scheme=${uri.scheme}, host=${uri.host}, port=${uri.port}');
+      
+      _dio = Dio(BaseOptions(
+        baseUrl: baseUrl,
+        connectTimeout: const Duration(milliseconds: timeout),
+        receiveTimeout: const Duration(milliseconds: timeout),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      ));
+      
+      _dio!.interceptors.add(LogInterceptor(
+        requestBody: true,
+        responseBody: true,
+        logPrint: (obj) => AppLogger.debug('API: $obj'),
+      ));
+      
+      _isInitialized = true;
+      AppLogger.info('API Service initialized successfully with base URL: $baseUrl');
+    } catch (e) {
+      AppLogger.error('Failed to initialize API Service: $e');
+      AppLogger.error('Base URL that caused the error: ${await ConfigService.getBackendUrl()}');
+      _isInitialized = false;
+    }
+  }
+
+  /// Ensure the API service is initialized before making requests
+  Future<void> _ensureInitialized() async {
+    if (!_isInitialized || _dio == null) {
+      await _initializeDio();
+    }
   }
   
   /// Update the base URL and reinitialize the Dio instance
@@ -38,11 +61,13 @@ class ApiService {
   // Health check
   Future<Map<String, dynamic>> checkHealth() async {
     try {
+      await _ensureInitialized();
+      
       final baseUrl = await ConfigService.getBackendUrl();
       AppLogger.info('Attempting to connect to: $baseUrl');
       AppLogger.debug('Full URL: $baseUrl/health/');
       
-      final response = await _dio.get('/health/');
+      final response = await _dio!.get('/health/');
       AppLogger.info('Health check successful: ${response.statusCode}');
       return {
         'success': true,
@@ -68,6 +93,8 @@ class ApiService {
   // Object Detection
   Future<Map<String, dynamic>> detectObjects(String imagePath) async {
     try {
+      await _ensureInitialized();
+      
       final file = File(imagePath);
       if (!await file.exists()) {
         return {
@@ -84,7 +111,7 @@ class ApiService {
       });
 
       AppLogger.info('Sending image to backend: $imagePath');
-      final response = await _dio.post(
+      final response = await _dio!.post(
         '/visual-assist/detect-objects/',
         data: formData,
         options: Options(
@@ -116,6 +143,8 @@ class ApiService {
   // Speech to Text
   Future<Map<String, dynamic>> transcribeAudio(String audioPath, {String language = 'en'}) async {
     try {
+      await _ensureInitialized();
+      
       final file = File(audioPath);
       if (!await file.exists()) {
         return {
@@ -132,7 +161,7 @@ class ApiService {
         'language': language,
       });
 
-      final response = await _dio.post(
+      final response = await _dio!.post(
         '/hearing-assist/transcribe/',
         data: formData,
         options: Options(
@@ -160,7 +189,8 @@ class ApiService {
   // Get transcription history
   Future<List<Map<String, dynamic>>> getTranscriptionHistory() async {
     try {
-      final response = await _dio.get('/hearing-assist/history/');
+      await _ensureInitialized();
+      final response = await _dio!.get('/hearing-assist/history/');
       return List<Map<String, dynamic>>.from(response.data ?? []);
     } catch (e) {
       AppLogger.error('Failed to get transcription history: $e');
@@ -171,8 +201,9 @@ class ApiService {
   // Test API connection
   Future<Map<String, dynamic>> testConnection() async {
     try {
+      await _ensureInitialized();
       final startTime = DateTime.now();
-      final response = await _dio.get('/health/');
+      final response = await _dio!.get('/health/');
       final endTime = DateTime.now();
       
       return {
@@ -191,6 +222,6 @@ class ApiService {
   }
 
   void dispose() {
-    _dio.close();
+    _dio?.close();
   }
 }
