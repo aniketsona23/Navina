@@ -1,6 +1,6 @@
 # A11yPal Django Backend
 
-A comprehensive Django REST API backend for the A11yPal accessibility mobile application.
+A comprehensive Django REST API backend for the A11yPal/Navina accessibility mobile application. This backend serves the Flutter app in `nayati_flutter`.
 
 ## 🚀 Features
 
@@ -81,6 +81,13 @@ A comprehensive Django REST API backend for the A11yPal accessibility mobile app
    pip install -r requirements.txt
    ```
 
+   Windows note (PyAudio): if installation fails
+
+   ```bat
+   pip install pipwin
+   pipwin install pyaudio
+   ```
+
 4. **Run migrations:**
 
    ```bash
@@ -99,9 +106,15 @@ A comprehensive Django REST API backend for the A11yPal accessibility mobile app
    python manage.py runserver
    ```
 
-The API will be available at `http://localhost:8000/`
+The API will be available at `http://localhost:8000/` (health: `GET /api/health/`)
 
 ## 📚 API Endpoints
+
+Base URL for all endpoints: `http://HOST:8000/api`
+
+### Health
+
+- `GET /api/health/` - Health check
 
 ### Authentication
 
@@ -125,6 +138,12 @@ The API will be available at `http://localhost:8000/`
 - `POST /api/visual-assist/analyze-colors/` - Analyze colors for accessibility
 - `GET /api/visual-assist/analyses/` - List image analyses
 - `GET /api/visual-assist/stats/` - Get usage statistics
+
+Object detection (real-time/testing):
+
+- `POST /api/visual-assist/detect-objects/`
+- `POST /api/visual-assist/detect-test/`
+- `POST /api/visual-assist/detect-simple/`
 
 ### Hearing Assistance
 
@@ -170,11 +189,15 @@ DATABASE_URL=sqlite:///db.sqlite3
 
 ### CORS Settings
 
-The API is configured to allow requests from:
+For local development with the Flutter app:
 
-- `http://localhost:3000` (React Native Web)
-- `http://localhost:8081` (Expo)
-- `http://localhost:8082` (Alternative Expo port)
+- Mobile devices and emulators do not enforce browser CORS, but Flutter Web does. You can either:
+  - Set `CORS_ALLOW_ALL_ORIGINS = True` in development, or
+  - Add specific dev origins to `CORS_ALLOWED_ORIGINS` (e.g., `http://localhost:<flutter_web_port>`)
+
+Networking tips:
+
+- Android emulator cannot reach `localhost`; use `http://10.0.2.2:8000/` for the base host or run `adb reverse tcp:8000 tcp:8000` when using a physical device via USB.
 
 ## 📊 Database Models
 
@@ -229,13 +252,15 @@ Authorization: Token your-token-here
 
 ## 📱 Mobile App Integration
 
-The backend is designed to work seamlessly with the React Native mobile app. Key integration points:
+The backend is designed to work seamlessly with the Flutter mobile app (`nayati_flutter`). Key integration points:
 
 1. **Authentication**: Token-based authentication for secure API access
 2. **File Uploads**: Support for image and audio file uploads
 3. **Real-time Data**: Location tracking and emergency alerts
 4. **Offline Support**: Cached data and sync capabilities
 5. **Privacy**: Comprehensive privacy controls and data export
+
+Model assets: Object detection uses YOLOv5 weights. Ensure the file `yolov5nu.pt` (present alongside the backend) is available and that paths referenced in the object detection service are correct.
 
 ## 🚀 Deployment
 
