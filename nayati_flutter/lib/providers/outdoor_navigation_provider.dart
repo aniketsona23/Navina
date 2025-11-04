@@ -75,12 +75,13 @@ class OutdoorNavigationProvider extends ChangeNotifier {
         if (route['legs'].isNotEmpty && route['legs'][0]['steps'].isNotEmpty) {
           _navigationSteps = List<Map<String, dynamic>>.from(
             route['legs'][0]['steps'].map((step) => {
-              'instruction': step['instruction'],
-              'distance': step['distance']['text'],
-              'duration': step['duration']['text'],
-              'accessibility_features': step['accessibility_features'] ?? [],
-              'hazards': step['hazards'] ?? [],
-            }),
+                  'instruction': step['instruction'],
+                  'distance': step['distance']['text'],
+                  'duration': step['duration']['text'],
+                  'accessibility_features':
+                      step['accessibility_features'] ?? [],
+                  'hazards': step['hazards'] ?? [],
+                }),
           );
         }
       }
@@ -123,11 +124,26 @@ class OutdoorNavigationProvider extends ChangeNotifier {
   // Update current location
   Future<void> updateCurrentLocation() async {
     try {
+      // Ensure permissions are granted
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        _setError('Location permissions are denied.');
+        return;
+      }
+
+      // Use the new locationSettings parameter (desiredAccuracy deprecated)
       Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+        ),
       );
+
       setCurrentPosition(position);
-      
+
       // Update location on server
       await OutdoorNavigationService.updateLocation(position);
     } catch (e) {
@@ -155,9 +171,11 @@ class OutdoorNavigationProvider extends ChangeNotifier {
   }
 
   // Get accessibility rating
-  Future<Map<String, dynamic>?> getAccessibilityRating(Position position) async {
+  Future<Map<String, dynamic>?> getAccessibilityRating(
+      Position position) async {
     try {
-      return await OutdoorNavigationService.getAccessibilityRating(position: position);
+      return await OutdoorNavigationService.getAccessibilityRating(
+          position: position);
     } catch (e) {
       _setError('Failed to get accessibility rating: $e');
       return null;

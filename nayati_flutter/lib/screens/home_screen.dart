@@ -50,9 +50,9 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppConstants.defaultSpacing),
-        Text(
+        const Text(
           AppConstants.chooseModeText,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 16,
             color: AppTheme.textSecondary,
           ),
@@ -143,9 +143,9 @@ class HomeScreen extends StatelessWidget {
   Widget _buildQuickAccess(BuildContext context) {
     return Column(
       children: [
-        Text(
+        const Text(
           AppConstants.quickAccessText,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 16,
             color: AppTheme.textSecondary,
           ),

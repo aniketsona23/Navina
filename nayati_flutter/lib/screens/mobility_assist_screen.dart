@@ -73,7 +73,7 @@ class _MobilityAssistScreenState extends State<MobilityAssistScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SectionTitle('Quick Destinations'),
+        const SectionTitle('Quick Destinations'),
         const SizedBox(height: AppConstants.defaultSpacing),
         Row(
           children: [
@@ -275,7 +275,7 @@ class _MobilityAssistScreenState extends State<MobilityAssistScreen> {
                 ],
               ),
             );
-          }).toList(),
+          }),
           const SizedBox(height: 20),
           SizedBox(
             width: double.infinity,
@@ -309,9 +309,9 @@ class _MobilityAssistScreenState extends State<MobilityAssistScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Start Indoor Navigation',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
               color: AppTheme.textPrimary,
@@ -359,7 +359,7 @@ class _MobilityAssistScreenState extends State<MobilityAssistScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SectionTitle('Accessibility Features'),
+        const SectionTitle('Accessibility Features'),
         const SizedBox(height: 16),
         _buildFeatureCard(
           'Voice Guidance',
