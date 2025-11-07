@@ -2,4 +2,8 @@ src/**
 **/__pycache__
 venv
 env
+.env
 .env*.local
+nayati_flutter/macos/*
+nayati_flutter/windows/*
+nayati_flutter/android/*
