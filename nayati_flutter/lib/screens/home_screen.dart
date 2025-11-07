@@ -50,9 +50,9 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppConstants.defaultSpacing),
-        Text(
+        const Text(
           AppConstants.chooseModeText,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 16,
             color: AppTheme.textSecondary,
           ),
@@ -67,21 +67,24 @@ class HomeScreen extends StatelessWidget {
       {
         'id': 'visual',
         'title': AppConstants.visualAssistTitle,
-        'description': 'Object detection, text reading, and navigation guidance',
+        'description':
+            'Object detection, text reading, and navigation guidance',
         'icon': Icons.visibility_outlined,
         'color': AppTheme.visualAssistColor,
       },
       {
         'id': 'hearing',
         'title': AppConstants.hearingAssistTitle,
-        'description': 'Live transcription, sound alerts, and visual notifications',
+        'description':
+            'Live transcription, sound alerts, and visual notifications',
         'icon': Icons.hearing_outlined,
         'color': AppTheme.hearingAssistColor,
       },
       {
         'id': 'mobility',
         'title': AppConstants.mobilityAssistTitle,
-        'description': 'Accessible routes, indoor navigation, and mobility guidance',
+        'description':
+            'Accessible routes, indoor navigation, and mobility guidance',
         'icon': Icons.directions_walk_outlined,
         'color': AppTheme.mobilityAssistColor,
       },
@@ -143,9 +146,9 @@ class HomeScreen extends StatelessWidget {
   Widget _buildQuickAccess(BuildContext context) {
     return Column(
       children: [
-        Text(
+        const Text(
           AppConstants.quickAccessText,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 16,
             color: AppTheme.textSecondary,
           ),
@@ -191,11 +194,13 @@ class HomeScreen extends StatelessWidget {
       backgroundColor: AppTheme.surfaceColor,
       borderRadius: AppConstants.buttonBorderRadius,
       onTap: onTap,
-      padding: const EdgeInsets.symmetric(horizontal: AppConstants.defaultPadding, vertical: 12),
+      padding: const EdgeInsets.symmetric(
+          horizontal: AppConstants.defaultPadding, vertical: 12),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: AppConstants.defaultIconSize, color: AppTheme.textPrimary),
+          Icon(icon,
+              size: AppConstants.defaultIconSize, color: AppTheme.textPrimary),
           const SizedBox(width: AppConstants.smallSpacing),
           Text(
             text,

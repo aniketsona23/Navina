@@ -7,9 +7,9 @@ class SpeechRecognitionProvider extends ChangeNotifier {
   static const String _defaultLocaleId = 'en_US';
   static const Duration _listenDuration = Duration(minutes: 10);
   static const Duration _pauseDuration = Duration(seconds: 3);
-  
+
   final stt.SpeechToText _speech = stt.SpeechToText();
-  
+
   bool _isListening = false;
   bool _isAvailable = false;
   String _currentText = '';
@@ -33,7 +33,7 @@ class SpeechRecognitionProvider extends ChangeNotifier {
 
   Future<void> initialize() async {
     SpeechLogger.info('Initializing speech recognition...');
-    
+
     try {
       // Request microphone permission
       final status = await Permission.microphone.request();
@@ -63,19 +63,21 @@ class SpeechRecognitionProvider extends ChangeNotifier {
         // Get available locales
         _localeNames = await _speech.locales();
         SpeechLogger.debug('Available locales: ${_localeNames.length}');
-        
+
         // Set default locale to English if available
         final englishLocale = _localeNames.firstWhere(
           (locale) => locale.localeId.startsWith('en'),
-          orElse: () => _localeNames.isNotEmpty ? _localeNames.first : stt.LocaleName('en_US', 'English'),
+          orElse: () => _localeNames.isNotEmpty
+              ? _localeNames.first
+              : stt.LocaleName('en_US', 'English'),
         );
         _currentLocaleId = englishLocale.localeId;
-        
+
         SpeechLogger.info('Speech recognition initialized successfully');
       } else {
         _errorMessage = 'Speech recognition not available on this device';
       }
-      
+
       notifyListeners();
     } catch (e) {
       SpeechLogger.error('Failed to initialize speech recognition: $e');
@@ -88,7 +90,7 @@ class SpeechRecognitionProvider extends ChangeNotifier {
     if (!_isAvailable || _isListening) return;
 
     SpeechLogger.info('Starting speech recognition...');
-    
+
     try {
       await _speech.listen(
         onResult: (result) {
@@ -97,9 +99,14 @@ class SpeechRecognitionProvider extends ChangeNotifier {
           _confidence = result.confidence;
           notifyListeners();
         },
+        listenOptions: stt.SpeechListenOptions(
+          listenMode: stt.ListenMode.confirmation, // or continuous
+          partialResults: true, // equivalent to the old parameter
+          cancelOnError: false,
+          autoPunctuation: true, // optional new feature
+        ),
         listenFor: _listenDuration,
         pauseFor: _pauseDuration,
-        partialResults: true,
         localeId: _currentLocaleId,
         onSoundLevelChange: (level) {
           // Optional: Handle sound level changes for visual feedback
@@ -116,7 +123,7 @@ class SpeechRecognitionProvider extends ChangeNotifier {
     if (!_isListening) return;
 
     SpeechLogger.info('Stopping speech recognition...');
-    
+
     try {
       await _speech.stop();
       // Add any remaining current text to full text
@@ -135,7 +142,7 @@ class SpeechRecognitionProvider extends ChangeNotifier {
 
   Future<void> cancelListening() async {
     SpeechLogger.info('Cancelling speech recognition...');
-    
+
     try {
       await _speech.cancel();
       _currentText = '';
@@ -169,5 +176,4 @@ class SpeechRecognitionProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
-
 }

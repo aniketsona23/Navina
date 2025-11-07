@@ -39,7 +39,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     subtitle: 'Receive alerts and updates',
                     leadingIcon: Icons.notifications_outlined,
                     value: _notificationsEnabled,
-                    onChanged: (value) => setState(() => _notificationsEnabled = value),
+                    onChanged: (value) =>
+                        setState(() => _notificationsEnabled = value),
                   ),
                   const Divider(),
                   AppSwitchTile(
@@ -47,14 +48,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     subtitle: 'Vibration for interactions',
                     leadingIcon: Icons.vibration,
                     value: _hapticFeedbackEnabled,
-                    onChanged: (value) => setState(() => _hapticFeedbackEnabled = value),
+                    onChanged: (value) =>
+                        setState(() => _hapticFeedbackEnabled = value),
                   ),
                 ],
               ),
             ),
-            
             const SizedBox(height: AppConstants.defaultSpacing),
-            
             const SectionTitle('Accessibility'),
             AppCard(
               child: Column(
@@ -64,7 +64,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     subtitle: 'Audio instructions for navigation',
                     leadingIcon: Icons.record_voice_over,
                     value: _voiceGuidanceEnabled,
-                    onChanged: (value) => setState(() => _voiceGuidanceEnabled = value),
+                    onChanged: (value) =>
+                        setState(() => _voiceGuidanceEnabled = value),
                   ),
                   const Divider(),
                   _buildLanguageTile(),
@@ -73,19 +74,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ],
               ),
             ),
-            
             const SizedBox(height: AppConstants.defaultSpacing),
-            
             const SectionTitle('Emergency Contacts'),
             const EmergencyContactsWidget(),
-            
             const SizedBox(height: AppConstants.defaultSpacing),
-            
             const SectionTitle('Backend Configuration'),
             const BackendConfigWidget(),
-            
             const SizedBox(height: AppConstants.defaultSpacing),
-            
             const SectionTitle('About'),
             AppCard(
               child: Column(

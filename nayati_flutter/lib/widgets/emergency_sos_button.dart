@@ -77,12 +77,12 @@ class _EmergencySOSButtonState extends State<EmergencySOSButton>
 
   void _handlePress() async {
     if (_isPressed) return;
-    
+
     setState(() => _isPressed = true);
-    
+
     // Provide immediate haptic feedback
     await HapticFeedback.heavyImpact();
-    
+
     // Trigger shake animation
     _shakeController.forward().then((_) {
       _shakeController.reset();
@@ -131,7 +131,7 @@ class _EmergencySOSButtonState extends State<EmergencySOSButton>
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-          
+
           // Header
           Container(
             padding: const EdgeInsets.all(20),
@@ -162,12 +162,12 @@ class _EmergencySOSButtonState extends State<EmergencySOSButton>
               ],
             ),
           ),
-          
+
           // Emergency actions
-          ...EmergencyService.getEmergencyActions().map((action) => 
-            _buildEmergencyActionTile(action),
+          ...EmergencyService.getEmergencyActions().map(
+            (action) => _buildEmergencyActionTile(action),
           ),
-          
+
           // Cancel button
           Container(
             width: double.infinity,
@@ -234,24 +234,26 @@ class _EmergencySOSButtonState extends State<EmergencySOSButton>
   Future<void> _handleEmergencyAction(EmergencyAction action) async {
     try {
       bool success = false;
-      
+
       switch (action.action) {
         case EmergencyActionType.call:
           success = await EmergencyService.callEmergency();
           break;
         case EmergencyActionType.sms:
           success = await EmergencyService.sendEmergencySMS(
-            'EMERGENCY SOS - I need help immediately!'
-          );
+              'EMERGENCY SOS - I need help immediately!');
           break;
         case EmergencyActionType.smsWithLocation:
           success = await EmergencyService.sendEmergencySMSWithLocation();
           break;
         case EmergencyActionType.contacts:
+          // Guard context usage after async gap
+          if (!mounted) return;
           _showEmergencyContacts();
           return;
       }
-      
+
+      if (!mounted) return; // Ensure widget still in tree before using context
       if (success) {
         _showSuccessMessage(action.title);
       } else {
@@ -259,17 +261,18 @@ class _EmergencySOSButtonState extends State<EmergencySOSButton>
       }
     } catch (e) {
       EmergencyLogger.error('Emergency action failed: $e');
-      _showErrorMessage(action.title);
+      if (mounted) {
+        _showErrorMessage(action.title);
+      }
     }
   }
-
 
   void _showEmergencyContacts() {
     EmergencyService.showEmergencyContactsDialog(context);
   }
 
-
   void _showSuccessMessage(String action) {
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('$action initiated successfully'),
@@ -280,6 +283,7 @@ class _EmergencySOSButtonState extends State<EmergencySOSButton>
   }
 
   void _showErrorMessage(String action) {
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Failed to initiate $action. Please try again.'),
@@ -385,17 +389,19 @@ class _EmergencySOSButtonState extends State<EmergencySOSButton>
 }
 
 /// Static helper method for handling emergency actions
-Future<void> _handleEmergencyActionAsync(BuildContext context, EmergencyAction action) async {
+Future<void> _handleEmergencyActionAsync(
+    BuildContext context, EmergencyAction action) async {
+  // Capture messenger up front to avoid using BuildContext after async gaps
+  final messenger = ScaffoldMessenger.maybeOf(context);
   bool success = false;
-  
+
   switch (action.action) {
     case EmergencyActionType.call:
       success = await EmergencyService.callEmergency();
       break;
     case EmergencyActionType.sms:
       success = await EmergencyService.sendEmergencySMS(
-        'EMERGENCY SOS - I need help immediately!'
-      );
+          'EMERGENCY SOS - I need help immediately!');
       break;
     case EmergencyActionType.smsWithLocation:
       success = await EmergencyService.sendEmergencySMSWithLocation();
@@ -404,28 +410,27 @@ Future<void> _handleEmergencyActionAsync(BuildContext context, EmergencyAction a
       EmergencyService.showEmergencyContactsDialog(context);
       return;
   }
-  
-  // Check if context is still valid before showing snackbar
-  try {
-    if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${action.title} initiated successfully'),
+
+  // Show result without using context post-awaits
+  if (success) {
+    if (messenger != null) {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Action initiated successfully'),
           backgroundColor: Colors.green,
         ),
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
+      AppLogger.info('${action.title} initiated successfully');
+    }
+  } else {
+    if (messenger != null) {
+      messenger.showSnackBar(
         SnackBar(
           content: Text('Failed to initiate ${action.title}'),
           backgroundColor: Colors.red,
         ),
       );
-    }
-  } catch (e) {
-    // Context is no longer valid, log the result instead
-    if (success) {
-      AppLogger.info('${action.title} initiated successfully');
     } else {
       AppLogger.error('Failed to initiate ${action.title}');
     }
@@ -444,14 +449,15 @@ class InlineSOSButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      onPressed: onPressed ?? () {
-        showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          backgroundColor: Colors.transparent,
-          builder: (context) => _buildEmergencyMenu(context),
-        );
-      },
+      onPressed: onPressed ??
+          () {
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              builder: (context) => _buildEmergencyMenu(context),
+            );
+          },
       icon: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
@@ -523,8 +529,8 @@ class InlineSOSButton extends StatelessWidget {
               ],
             ),
           ),
-          ...EmergencyService.getEmergencyActions().map((action) => 
-            ListTile(
+          ...EmergencyService.getEmergencyActions().map(
+            (action) => ListTile(
               leading: Container(
                 width: 48,
                 height: 48,

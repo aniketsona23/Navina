@@ -73,7 +73,7 @@ class _MobilityAssistScreenState extends State<MobilityAssistScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SectionTitle('Quick Destinations'),
+        const SectionTitle('Quick Destinations'),
         const SizedBox(height: AppConstants.defaultSpacing),
         Row(
           children: [
@@ -134,7 +134,8 @@ class _MobilityAssistScreenState extends State<MobilityAssistScreen> {
     required bool isPrimary,
   }) {
     return AppCard(
-      backgroundColor: isPrimary ? AppTheme.mobilityAssistColor : AppTheme.surfaceColor,
+      backgroundColor:
+          isPrimary ? AppTheme.mobilityAssistColor : AppTheme.surfaceColor,
       borderRadius: AppConstants.buttonBorderRadius,
       onTap: onTap,
       padding: const EdgeInsets.all(AppConstants.defaultSpacing),
@@ -179,7 +180,8 @@ class _MobilityAssistScreenState extends State<MobilityAssistScreen> {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: AppTheme.mobilityAssistColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
@@ -211,7 +213,7 @@ class _MobilityAssistScreenState extends State<MobilityAssistScreen> {
             final index = entry.key;
             final step = entry.value;
             final isCurrentStep = index == 0;
-            
+
             return Container(
               margin: const EdgeInsets.only(bottom: 16),
               child: Row(
@@ -220,13 +222,13 @@ class _MobilityAssistScreenState extends State<MobilityAssistScreen> {
                     width: 32,
                     height: 32,
                     decoration: BoxDecoration(
-                      color: isCurrentStep 
-                          ? AppTheme.mobilityAssistColor 
+                      color: isCurrentStep
+                          ? AppTheme.mobilityAssistColor
                           : AppTheme.surfaceColor,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: isCurrentStep 
-                            ? AppTheme.mobilityAssistColor 
+                        color: isCurrentStep
+                            ? AppTheme.mobilityAssistColor
                             : AppTheme.borderColor,
                         width: 2,
                       ),
@@ -235,7 +237,9 @@ class _MobilityAssistScreenState extends State<MobilityAssistScreen> {
                       child: Text(
                         '${index + 1}',
                         style: TextStyle(
-                          color: isCurrentStep ? Colors.white : AppTheme.textSecondary,
+                          color: isCurrentStep
+                              ? Colors.white
+                              : AppTheme.textSecondary,
                           fontWeight: FontWeight.w600,
                           fontSize: 14,
                         ),
@@ -251,8 +255,12 @@ class _MobilityAssistScreenState extends State<MobilityAssistScreen> {
                           step['instruction'],
                           style: TextStyle(
                             fontSize: 16,
-                            fontWeight: isCurrentStep ? FontWeight.w600 : FontWeight.w400,
-                            color: isCurrentStep ? AppTheme.mobilityAssistColor : AppTheme.textPrimary,
+                            fontWeight: isCurrentStep
+                                ? FontWeight.w600
+                                : FontWeight.w400,
+                            color: isCurrentStep
+                                ? AppTheme.mobilityAssistColor
+                                : AppTheme.textPrimary,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -275,7 +283,7 @@ class _MobilityAssistScreenState extends State<MobilityAssistScreen> {
                 ],
               ),
             );
-          }).toList(),
+          }),
           const SizedBox(height: 20),
           SizedBox(
             width: double.infinity,
@@ -309,9 +317,9 @@ class _MobilityAssistScreenState extends State<MobilityAssistScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Start Indoor Navigation',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
               color: AppTheme.textPrimary,
@@ -359,7 +367,7 @@ class _MobilityAssistScreenState extends State<MobilityAssistScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SectionTitle('Accessibility Features'),
+        const SectionTitle('Accessibility Features'),
         const SizedBox(height: 16),
         _buildFeatureCard(
           'Voice Guidance',

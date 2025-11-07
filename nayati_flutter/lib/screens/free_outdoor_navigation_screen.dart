@@ -14,10 +14,12 @@ class FreeOutdoorNavigationScreen extends StatefulWidget {
   const FreeOutdoorNavigationScreen({super.key});
 
   @override
-  State<FreeOutdoorNavigationScreen> createState() => _FreeOutdoorNavigationScreenState();
+  State<FreeOutdoorNavigationScreen> createState() =>
+      _FreeOutdoorNavigationScreenState();
 }
 
-class _FreeOutdoorNavigationScreenState extends State<FreeOutdoorNavigationScreen> {
+class _FreeOutdoorNavigationScreenState
+    extends State<FreeOutdoorNavigationScreen> {
   final MapController _mapController = MapController();
   Position? _currentPosition;
   LatLng? _destination;
@@ -68,12 +70,13 @@ class _FreeOutdoorNavigationScreenState extends State<FreeOutdoorNavigationScree
 
   Future<void> _getCurrentLocation() async {
     setState(() => _isLoading = true);
-    
+
     try {
       // Check if location services are enabled
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        _showLocationError('Location services are disabled. Please enable them to use navigation.');
+        _showLocationError(
+            'Location services are disabled. Please enable them to use navigation.');
         return;
       }
 
@@ -82,20 +85,22 @@ class _FreeOutdoorNavigationScreenState extends State<FreeOutdoorNavigationScree
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
-          _showLocationError('Location permissions are denied. Please enable them to use navigation.');
+          _showLocationError(
+              'Location permissions are denied. Please enable them to use navigation.');
           return;
         }
       }
 
       if (permission == LocationPermission.deniedForever) {
-        _showLocationError('Location permissions are permanently denied. Please enable them in settings.');
+        _showLocationError(
+            'Location permissions are permanently denied. Please enable them in settings.');
         return;
       }
 
       // Get current position
       Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
+          locationSettings:
+              const LocationSettings(accuracy: LocationAccuracy.high));
 
       setState(() {
         _currentPosition = position;
@@ -110,7 +115,7 @@ class _FreeOutdoorNavigationScreenState extends State<FreeOutdoorNavigationScree
 
       // Add current location marker
       _addCurrentLocationMarker();
-      
+
       // Start continuous location updates
       _startLocationUpdates();
     } catch (e) {
@@ -123,13 +128,15 @@ class _FreeOutdoorNavigationScreenState extends State<FreeOutdoorNavigationScree
     if (_currentPosition != null) {
       setState(() {
         // Remove existing current location marker
-        _markers.removeWhere((marker) => marker.key == const Key('current_location'));
-        
+        _markers.removeWhere(
+            (marker) => marker.key == const Key('current_location'));
+
         // Add new current location marker
         _markers.add(
           Marker(
             key: const Key('current_location'),
-            point: LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
+            point:
+                LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
             child: Container(
               decoration: BoxDecoration(
                 color: Colors.blue,
@@ -161,20 +168,22 @@ class _FreeOutdoorNavigationScreenState extends State<FreeOutdoorNavigationScree
     setState(() => _isLoading = true);
 
     try {
-      List<Location> locations = await locationFromAddress(_searchController.text);
-      
+      List<Location> locations =
+          await locationFromAddress(_searchController.text);
+
       if (locations.isNotEmpty) {
         Location location = locations.first;
         LatLng destination = LatLng(location.latitude, location.longitude);
-        
+
         setState(() {
           _destination = destination;
           _destinationName = _searchController.text;
         });
 
         // Remove existing destination marker
-        _markers.removeWhere((marker) => marker.key == const Key('destination'));
-        
+        _markers
+            .removeWhere((marker) => marker.key == const Key('destination'));
+
         // Add destination marker
         _markers.add(
           Marker(
@@ -219,7 +228,8 @@ class _FreeOutdoorNavigationScreenState extends State<FreeOutdoorNavigationScree
         // Calculate route (mock implementation)
         _calculateRoute();
       } else {
-        _showLocationError('Location not found. Please try a different search term.');
+        _showLocationError(
+            'Location not found. Please try a different search term.');
       }
     } catch (e) {
       _showLocationError('Error searching for location: ${e.toString()}');
@@ -382,13 +392,14 @@ class _FreeOutdoorNavigationScreenState extends State<FreeOutdoorNavigationScree
                       ],
                     ),
                     const SizedBox(height: 20),
-                    
+
                     // Show route summary
                     if (_currentRoute != null) ...[
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: AppTheme.mobilityAssistColor.withValues(alpha: 0.1),
+                          color: AppTheme.mobilityAssistColor
+                              .withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Row(
@@ -449,9 +460,10 @@ class _FreeOutdoorNavigationScreenState extends State<FreeOutdoorNavigationScree
                       ),
                       const SizedBox(height: 20),
                     ],
-                    
+
                     // Show turn-by-turn instructions
-                    if (_currentRoute != null && _currentRoute!.instructions.isNotEmpty) ...[
+                    if (_currentRoute != null &&
+                        _currentRoute!.instructions.isNotEmpty) ...[
                       const Text(
                         'Turn-by-Turn Directions',
                         style: TextStyle(
@@ -461,7 +473,10 @@ class _FreeOutdoorNavigationScreenState extends State<FreeOutdoorNavigationScree
                         ),
                       ),
                       const SizedBox(height: 12),
-                      ..._currentRoute!.instructions.asMap().entries.map((entry) {
+                      ..._currentRoute!.instructions
+                          .asMap()
+                          .entries
+                          .map((entry) {
                         final index = entry.key;
                         final instruction = entry.value;
                         return _buildNavigationStep(
@@ -475,7 +490,9 @@ class _FreeOutdoorNavigationScreenState extends State<FreeOutdoorNavigationScree
                       // Fallback instructions
                       _buildNavigationStep(
                         'Head towards destination',
-                        _currentRoute != null ? _formatDistance(_currentRoute!.distance) : 'Calculating...',
+                        _currentRoute != null
+                            ? _formatDistance(_currentRoute!.distance)
+                            : 'Calculating...',
                         Icons.navigation,
                         true,
                       ),
@@ -502,12 +519,15 @@ class _FreeOutdoorNavigationScreenState extends State<FreeOutdoorNavigationScree
     );
   }
 
-  Widget _buildNavigationStep(String instruction, String distance, IconData icon, bool isCurrent) {
+  Widget _buildNavigationStep(
+      String instruction, String distance, IconData icon, bool isCurrent) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isCurrent ? AppTheme.mobilityAssistColor.withValues(alpha: 0.1) : Colors.grey[50],
+        color: isCurrent
+            ? AppTheme.mobilityAssistColor.withValues(alpha: 0.1)
+            : Colors.grey[50],
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isCurrent ? AppTheme.mobilityAssistColor : Colors.grey[300]!,
@@ -520,7 +540,8 @@ class _FreeOutdoorNavigationScreenState extends State<FreeOutdoorNavigationScree
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: isCurrent ? AppTheme.mobilityAssistColor : Colors.grey[300],
+              color:
+                  isCurrent ? AppTheme.mobilityAssistColor : Colors.grey[300],
               borderRadius: BorderRadius.circular(20),
             ),
             child: Icon(
@@ -539,7 +560,9 @@ class _FreeOutdoorNavigationScreenState extends State<FreeOutdoorNavigationScree
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: isCurrent ? FontWeight.w600 : FontWeight.w400,
-                    color: isCurrent ? AppTheme.mobilityAssistColor : AppTheme.textPrimary,
+                    color: isCurrent
+                        ? AppTheme.mobilityAssistColor
+                        : AppTheme.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -606,7 +629,9 @@ class _FreeOutdoorNavigationScreenState extends State<FreeOutdoorNavigationScree
     } else {
       final hours = minutes ~/ 60;
       final remainingMinutes = minutes % 60;
-      return remainingMinutes > 0 ? '${hours}h ${remainingMinutes}m' : '${hours}h';
+      return remainingMinutes > 0
+          ? '${hours}h ${remainingMinutes}m'
+          : '${hours}h';
     }
   }
 
@@ -616,7 +641,8 @@ class _FreeOutdoorNavigationScreenState extends State<FreeOutdoorNavigationScree
       return Icons.turn_left;
     } else if (lowerInstruction.contains('turn right')) {
       return Icons.turn_right;
-    } else if (lowerInstruction.contains('straight') || lowerInstruction.contains('continue')) {
+    } else if (lowerInstruction.contains('straight') ||
+        lowerInstruction.contains('continue')) {
       return Icons.straight;
     } else if (lowerInstruction.contains('head north')) {
       return Icons.north;
@@ -626,7 +652,8 @@ class _FreeOutdoorNavigationScreenState extends State<FreeOutdoorNavigationScree
       return Icons.east;
     } else if (lowerInstruction.contains('head west')) {
       return Icons.west;
-    } else if (lowerInstruction.contains('arrive') || lowerInstruction.contains('destination')) {
+    } else if (lowerInstruction.contains('arrive') ||
+        lowerInstruction.contains('destination')) {
       return Icons.location_on;
     } else {
       return Icons.navigation;
@@ -662,8 +689,10 @@ class _FreeOutdoorNavigationScreenState extends State<FreeOutdoorNavigationScree
             mapController: _mapController,
             options: MapOptions(
               initialCenter: _currentPosition != null
-                  ? LatLng(_currentPosition!.latitude, _currentPosition!.longitude)
-                  : const LatLng(37.7749, -122.4194), // Default to San Francisco
+                  ? LatLng(
+                      _currentPosition!.latitude, _currentPosition!.longitude)
+                  : const LatLng(
+                      37.7749, -122.4194), // Default to San Francisco
               initialZoom: 16.0,
               minZoom: 3.0,
               maxZoom: 18.0,
@@ -675,20 +704,20 @@ class _FreeOutdoorNavigationScreenState extends State<FreeOutdoorNavigationScree
                 userAgentPackageName: 'com.example.nayati_flutter',
                 maxZoom: 18,
               ),
-              
+
               // Route polylines
               if (_polylines.isNotEmpty)
                 PolylineLayer(
                   polylines: _polylines,
                 ),
-              
+
               // Markers
               MarkerLayer(
                 markers: _markers,
               ),
             ],
           ),
-          
+
           // Search Bar
           Positioned(
             top: 16,
@@ -724,7 +753,8 @@ class _FreeOutdoorNavigationScreenState extends State<FreeOutdoorNavigationScree
                             setState(() {
                               _destination = null;
                               _destinationName = '';
-                              _markers.removeWhere((marker) => marker.key == const Key('destination'));
+                              _markers.removeWhere((marker) =>
+                                  marker.key == const Key('destination'));
                               _polylines.clear();
                             });
                           },
@@ -735,13 +765,14 @@ class _FreeOutdoorNavigationScreenState extends State<FreeOutdoorNavigationScree
                   ),
                   filled: true,
                   fillColor: Colors.white,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 ),
                 onSubmitted: (_) => _searchDestination(),
               ),
             ),
           ),
-          
+
           // Navigation Controls
           if (_destination != null && !_isNavigating)
             Positioned(
@@ -848,7 +879,7 @@ class _FreeOutdoorNavigationScreenState extends State<FreeOutdoorNavigationScree
                 ),
               ),
             ),
-          
+
           // Current Location Button
           Positioned(
             bottom: 16,
@@ -862,7 +893,7 @@ class _FreeOutdoorNavigationScreenState extends State<FreeOutdoorNavigationScree
               ),
             ),
           ),
-          
+
           // Loading indicator when getting location
           if (_isLoading)
             Positioned(
@@ -893,14 +924,15 @@ class _FreeOutdoorNavigationScreenState extends State<FreeOutdoorNavigationScree
                 ),
               ),
             ),
-          
+
           // Location status indicator
           if (_currentPosition != null && !_isLoading)
             Positioned(
               top: 16,
               right: 16,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
                   color: Colors.black.withValues(alpha: 0.7),
                   borderRadius: BorderRadius.circular(20),
@@ -929,7 +961,7 @@ class _FreeOutdoorNavigationScreenState extends State<FreeOutdoorNavigationScree
                 ),
               ),
             ),
-          
+
           // Free map indicator
           Positioned(
             bottom: 16,

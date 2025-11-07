@@ -11,11 +11,12 @@ class VisualAssistScreenModern extends StatefulWidget {
   const VisualAssistScreenModern({super.key});
 
   @override
-  State<VisualAssistScreenModern> createState() => _VisualAssistScreenModernState();
+  State<VisualAssistScreenModern> createState() =>
+      _VisualAssistScreenModernState();
 }
 
-class _VisualAssistScreenModernState extends State<VisualAssistScreenModern> with WidgetsBindingObserver {
-  
+class _VisualAssistScreenModernState extends State<VisualAssistScreenModern>
+    with WidgetsBindingObserver {
   CameraController? _cameraController;
   List<CameraDescription>? _cameras;
   bool _isScanning = false;
@@ -127,19 +128,23 @@ class _VisualAssistScreenModernState extends State<VisualAssistScreenModern> wit
       }
 
       final image = await _cameraController!.takePicture();
-      final provider = Provider.of<ObjectDetectionProvider>(context, listen: false);
+      if (!mounted) return; // Guard context use after async gap
+      final provider =
+          Provider.of<ObjectDetectionProvider>(context, listen: false);
       await provider.detectObjects(image.path);
     } catch (e) {
       CameraLogger.error('Failed to capture and detect: $e');
-      if (e.toString().contains('Camera') || e.toString().contains('Device error')) {
-        setState(() {
-          _isScanning = false;
-        });
+      if (e.toString().contains('Camera') ||
+          e.toString().contains('Device error')) {
         _stopContinuousCapture();
         if (mounted) {
+          setState(() {
+            _isScanning = false;
+          });
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Camera error occurred. Please restart the camera.'),
+              content:
+                  Text('Camera error occurred. Please restart the camera.'),
               duration: Duration(seconds: 3),
             ),
           );
@@ -165,10 +170,11 @@ class _VisualAssistScreenModernState extends State<VisualAssistScreenModern> wit
       _isInitialized = false;
 
       _selectedCameraIndex = (_selectedCameraIndex + 1) % _cameras!.length;
-      
+
       await _initializeCameraController();
-      
+
       if (wasScanning && _isInitialized) {
+        if (!mounted) return; // Safety: setState after async
         setState(() {
           _isScanning = true;
         });
@@ -267,14 +273,14 @@ class _VisualAssistScreenModernState extends State<VisualAssistScreenModern> wit
             )
           else
             _buildCameraPlaceholder(),
-          
+
           // Detection overlay
           Consumer<ObjectDetectionProvider>(
             builder: (context, detectionProvider, child) {
               return _buildDetectionOverlay(detectionProvider);
             },
           ),
-          
+
           // Top controls
           Positioned(
             top: 0,
@@ -299,14 +305,16 @@ class _VisualAssistScreenModernState extends State<VisualAssistScreenModern> wit
                     Row(
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                          icon: const Icon(Icons.arrow_back_ios,
+                              color: Colors.white),
                           onPressed: _toggleFullscreen,
                         ),
                         const InlineSOSButton(),
                       ],
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
                         color: _isScanning ? Colors.green : Colors.grey,
                         borderRadius: BorderRadius.circular(20),
@@ -315,7 +323,9 @@ class _VisualAssistScreenModernState extends State<VisualAssistScreenModern> wit
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
-                            _isScanning ? Icons.visibility : Icons.visibility_off,
+                            _isScanning
+                                ? Icons.visibility
+                                : Icons.visibility_off,
                             color: Colors.white,
                             size: 16,
                           ),
@@ -332,7 +342,8 @@ class _VisualAssistScreenModernState extends State<VisualAssistScreenModern> wit
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.fullscreen_exit, color: Colors.white),
+                      icon: const Icon(Icons.fullscreen_exit,
+                          color: Colors.white),
                       onPressed: _toggleFullscreen,
                     ),
                   ],
@@ -340,7 +351,7 @@ class _VisualAssistScreenModernState extends State<VisualAssistScreenModern> wit
               ),
             ),
           ),
-          
+
           // Bottom controls
           Positioned(
             bottom: 0,
@@ -378,13 +389,16 @@ class _VisualAssistScreenModernState extends State<VisualAssistScreenModern> wit
                       icon: _isScanning ? Icons.stop : Icons.play_arrow,
                       onPressed: _toggleScanning,
                       tooltip: _isScanning ? 'Stop Scanning' : 'Start Scanning',
-                      backgroundColor: _isScanning ? Colors.red : const Color(0xFF2563EB),
+                      backgroundColor:
+                          _isScanning ? Colors.red : const Color(0xFF2563EB),
                       isPrimary: true,
                     ),
                     _buildModernButton(
                       icon: Icons.clear_all,
                       onPressed: () {
-                        final provider = Provider.of<ObjectDetectionProvider>(context, listen: false);
+                        final provider = Provider.of<ObjectDetectionProvider>(
+                            context,
+                            listen: false);
                         provider.clearDetections();
                       },
                       tooltip: 'Clear Detections',
@@ -430,14 +444,14 @@ class _VisualAssistScreenModernState extends State<VisualAssistScreenModern> wit
               )
             else
               _buildCameraPlaceholder(),
-            
+
             // Detection overlay
             Consumer<ObjectDetectionProvider>(
               builder: (context, detectionProvider, child) {
                 return _buildDetectionOverlay(detectionProvider);
               },
             ),
-            
+
             // Fullscreen button
             Positioned(
               top: 12,
@@ -454,13 +468,14 @@ class _VisualAssistScreenModernState extends State<VisualAssistScreenModern> wit
                 ),
               ),
             ),
-            
+
             // Status indicator
             Positioned(
               top: 12,
               left: 12,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: _isScanning ? Colors.green : Colors.grey,
                   borderRadius: BorderRadius.circular(20),
@@ -509,7 +524,9 @@ class _VisualAssistScreenModernState extends State<VisualAssistScreenModern> wit
             Expanded(
               child: _buildStatCard(
                 'Processing Time',
-                provider.processingTime > 0 ? '${provider.processingTime.toStringAsFixed(0)}ms' : '0ms',
+                provider.processingTime > 0
+                    ? '${provider.processingTime.toStringAsFixed(0)}ms'
+                    : '0ms',
                 Icons.speed,
                 const Color(0xFF16A34A),
               ),
@@ -518,7 +535,9 @@ class _VisualAssistScreenModernState extends State<VisualAssistScreenModern> wit
             Expanded(
               child: _buildStatCard(
                 'Camera',
-                _cameras != null ? '${_cameras!.length} Available' : '0 Available',
+                _cameras != null
+                    ? '${_cameras!.length} Available'
+                    : '0 Available',
                 Icons.camera_alt,
                 const Color(0xFFEA580C),
               ),
@@ -529,7 +548,8 @@ class _VisualAssistScreenModernState extends State<VisualAssistScreenModern> wit
     );
   }
 
-  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
+  Widget _buildStatCard(
+      String title, String value, IconData icon, Color color) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -630,7 +650,8 @@ class _VisualAssistScreenModernState extends State<VisualAssistScreenModern> wit
                 icon: Icons.clear_all,
                 label: 'Clear',
                 onPressed: () {
-                  final provider = Provider.of<ObjectDetectionProvider>(context, listen: false);
+                  final provider = Provider.of<ObjectDetectionProvider>(context,
+                      listen: false);
                   provider.clearDetections();
                 },
                 color: const Color(0xFF6B7280),
@@ -657,7 +678,9 @@ class _VisualAssistScreenModernState extends State<VisualAssistScreenModern> wit
           decoration: BoxDecoration(
             color: isPrimary ? color : color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(16),
-            border: isPrimary ? null : Border.all(color: color.withValues(alpha: 0.3)),
+            border: isPrimary
+                ? null
+                : Border.all(color: color.withValues(alpha: 0.3)),
           ),
           child: IconButton(
             icon: Icon(icon, color: isPrimary ? Colors.white : color, size: 24),
@@ -753,7 +776,8 @@ class _VisualAssistScreenModernState extends State<VisualAssistScreenModern> wit
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
                       color: const Color(0xFF2563EB).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
@@ -775,7 +799,8 @@ class _VisualAssistScreenModernState extends State<VisualAssistScreenModern> wit
                 runSpacing: 8,
                 children: provider.detections.map((detection) {
                   return Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
                       color: const Color(0xFF2563EB).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
@@ -819,10 +844,10 @@ class _VisualAssistScreenModernState extends State<VisualAssistScreenModern> wit
     Color? backgroundColor,
     bool isPrimary = false,
   }) {
-    final defaultColor = isPrimary 
-        ? const Color(0xFF2563EB) 
+    final defaultColor = isPrimary
+        ? const Color(0xFF2563EB)
         : Colors.black.withValues(alpha: 0.6);
-    
+
     return Tooltip(
       message: tooltip,
       child: Container(
@@ -921,7 +946,8 @@ class DetectionPainter extends CustomPainter {
       canvas.drawRect(rect, fillPaint);
       canvas.drawRect(rect, paint);
 
-      final label = '${detection.name} (${(detection.confidence * 100).toStringAsFixed(0)}%)';
+      final label =
+          '${detection.name} (${(detection.confidence * 100).toStringAsFixed(0)}%)';
       textPainter.text = TextSpan(
         text: label,
         style: const TextStyle(
@@ -931,19 +957,19 @@ class DetectionPainter extends CustomPainter {
         ),
       );
       textPainter.layout();
-      
+
       final labelRect = Rect.fromLTWH(
         x,
         y - textPainter.height - 4,
         textPainter.width + 8,
         textPainter.height + 4,
       );
-      
+
       final labelPaint = Paint()
         ..color = const Color(0xFF2563EB)
         ..style = PaintingStyle.fill;
       canvas.drawRect(labelRect, labelPaint);
-      
+
       textPainter.paint(
         canvas,
         Offset(x + 4, y - textPainter.height),

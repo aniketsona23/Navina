@@ -173,7 +173,7 @@ class AppDropdown<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<T>(
-      value: value,
+      initialValue: value,
       items: items,
       onChanged: onChanged,
       hint: hintText != null ? Text(hintText!) : null,
@@ -197,7 +197,8 @@ class AppDropdown<T> extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppTheme.primaryColor),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         fillColor: Colors.white,
         filled: true,
       ),
@@ -249,7 +250,8 @@ class AppSlider extends StatelessWidget {
             activeTrackColor: activeColor ?? AppTheme.primaryColor,
             inactiveTrackColor: inactiveColor ?? AppTheme.lightGray,
             thumbColor: activeColor ?? AppTheme.primaryColor,
-            overlayColor: (activeColor ?? AppTheme.primaryColor).withValues(alpha: 0.2),
+            overlayColor:
+                (activeColor ?? AppTheme.primaryColor).withValues(alpha: 0.2),
             valueIndicatorColor: activeColor ?? AppTheme.primaryColor,
             valueIndicatorTextStyle: const TextStyle(
               color: Colors.white,
