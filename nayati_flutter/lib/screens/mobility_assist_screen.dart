@@ -74,6 +74,7 @@ class _MobilityAssistScreenState extends State<MobilityAssistScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SectionTitle('Quick Destinations'),
+        const SectionTitle('Quick Destinations'),
         const SizedBox(height: AppConstants.defaultSpacing),
         Row(
           children: [

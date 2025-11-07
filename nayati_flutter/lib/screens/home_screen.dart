@@ -51,7 +51,9 @@ class HomeScreen extends StatelessWidget {
         ),
         const SizedBox(height: AppConstants.defaultSpacing),
         const Text(
+        const Text(
           AppConstants.chooseModeText,
+          style: TextStyle(
           style: TextStyle(
             fontSize: 16,
             color: AppTheme.textSecondary,

@@ -27,6 +27,9 @@ void main() async {
   // Initialize configuration service
   await ConfigService.initialize();
   
+  // Clear any malformed URLs that might cause issues
+  await ConfigService.clearMalformedUrls();
+  
   // Request permissions
   await _requestPermissions();
   

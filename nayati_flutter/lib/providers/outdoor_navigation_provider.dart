@@ -82,6 +82,13 @@ class OutdoorNavigationProvider extends ChangeNotifier {
                       step['accessibility_features'] ?? [],
                   'hazards': step['hazards'] ?? [],
                 }),
+                  'instruction': step['instruction'],
+                  'distance': step['distance']['text'],
+                  'duration': step['duration']['text'],
+                  'accessibility_features':
+                      step['accessibility_features'] ?? [],
+                  'hazards': step['hazards'] ?? [],
+                }),
           );
         }
       }
@@ -124,17 +131,27 @@ class OutdoorNavigationProvider extends ChangeNotifier {
   // Update current location
   Future<void> updateCurrentLocation() async {
     try {
-      // Define location settings
-      const locationSettings = LocationSettings(
-        accuracy: LocationAccuracy.high, // same as before
+      // Ensure permissions are granted
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        _setError('Location permissions are denied.');
+        return;
+      }
+
+      // Use the new locationSettings parameter (desiredAccuracy deprecated)
+      Position position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+        ),
       );
 
-      // Get current position with new API
-      Position position = await Geolocator.getCurrentPosition(
-        locationSettings: locationSettings,
-      );
 
       setCurrentPosition(position);
+
 
       // Update location on server
       await OutdoorNavigationService.updateLocation(position);
@@ -165,7 +182,11 @@ class OutdoorNavigationProvider extends ChangeNotifier {
   // Get accessibility rating
   Future<Map<String, dynamic>?> getAccessibilityRating(
       Position position) async {
+  Future<Map<String, dynamic>?> getAccessibilityRating(
+      Position position) async {
     try {
+      return await OutdoorNavigationService.getAccessibilityRating(
+          position: position);
       return await OutdoorNavigationService.getAccessibilityRating(
           position: position);
     } catch (e) {

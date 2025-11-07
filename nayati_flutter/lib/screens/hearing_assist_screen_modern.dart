@@ -15,7 +15,7 @@ class HearingAssistScreenModern extends StatefulWidget {
 
 class _HearingAssistScreenModernState extends State<HearingAssistScreenModern> with TickerProviderStateMixin {
   static const String _defaultLanguage = 'English';
-  static const List<String> _availableLanguages = ['English', 'Spanish', 'French', 'German', 'Italian'];
+  static const List<String> _availableLanguages = ['Auto-Detect', 'English', 'Spanish', 'French', 'German', 'Italian', 'Hindi'];
   static const Duration _pulseDuration = Duration(milliseconds: 1500);
   
   late AnimationController _pulseController;
@@ -77,7 +77,12 @@ class _HearingAssistScreenModernState extends State<HearingAssistScreenModern> w
       provider.stopListening();
       _pulseController.stop();
     } else {
-      provider.startListening();
+      // Use auto-detection if selected, otherwise use regular listening
+      if (_currentLanguage == 'Auto-Detect') {
+        provider.startListeningWithAutoDetect();
+      } else {
+        provider.startListening();
+      }
       _pulseController.repeat(reverse: true);
     }
   }
@@ -148,6 +153,12 @@ class _HearingAssistScreenModernState extends State<HearingAssistScreenModern> w
               setState(() {
                 _currentLanguage = language;
               });
+              // Update speech recognition language
+              final speechProvider = Provider.of<SpeechRecognitionProvider>(context, listen: false);
+              speechProvider.setLanguage(language);
+              // Update text-to-speech language
+              final ttsProvider = Provider.of<TextToSpeechProvider>(context, listen: false);
+              ttsProvider.setLanguageByName(language);
             },
             itemBuilder: (context) => _availableLanguages.map((language) {
               return PopupMenuItem<String>(
@@ -279,7 +290,7 @@ class _HearingAssistScreenModernState extends State<HearingAssistScreenModern> w
             Expanded(
               child: _buildStatCard(
                 'Language',
-                _currentLanguage,
+                _getLanguageDisplayText(),
                 Icons.language,
                 const Color(0xFFEA580C),
               ),
@@ -824,6 +835,34 @@ class _HearingAssistScreenModernState extends State<HearingAssistScreenModern> w
     if (confidence >= 0.8) return const Color(0xFF16A34A);
     if (confidence >= 0.6) return const Color(0xFFEA580C);
     return const Color(0xFFEF4444);
+  }
+
+  String _getLanguageDisplayText() {
+    if (_currentLanguage == 'Auto-Detect') {
+      final speechProvider = Provider.of<SpeechRecognitionProvider>(context, listen: false);
+      final currentLocale = speechProvider.currentLocaleId;
+      
+      // Map locale ID back to language name for display
+      switch (currentLocale) {
+        case 'en_US':
+          return 'Auto (English)';
+        case 'es_ES':
+          return 'Auto (Spanish)';
+        case 'fr_FR':
+          return 'Auto (French)';
+        case 'de_DE':
+          return 'Auto (German)';
+        case 'it_IT':
+          return 'Auto (Italian)';
+        case 'hi_IN':
+          return 'Auto (Hindi)';
+        case 'auto':
+          return 'Auto-Detect';
+        default:
+          return 'Auto-Detect';
+      }
+    }
+    return _currentLanguage;
   }
 
   Widget _buildErrorScreen(String error) {

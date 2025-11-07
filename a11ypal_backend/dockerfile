@@ -1,0 +1,27 @@
+# Use a stable Python base (3.11 is often safer for wheels than 3.13)
+FROM python:3.11-slim
+
+# set workdir
+WORKDIR /app
+
+# install system deps needed to build pyaudio and other native deps
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    portaudio19-dev \
+    libsndfile1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# copy project files
+COPY pyproject.toml poetry.lock requirements.txt /app/
+COPY . /app
+
+# install python deps; adjust depending on your installer (pip / poetry)
+# if using pip:
+RUN pip install --upgrade pip setuptools wheel
+RUN pip install -r requirements.txt
+
+# expose port your app listens on (example 8000)
+EXPOSE 8000
+
+# start command: change to your actual start command
+CMD ["gunicorn", "myproject.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3"]

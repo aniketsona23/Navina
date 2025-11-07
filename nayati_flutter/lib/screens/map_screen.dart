@@ -10,6 +10,7 @@ class MapScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const AppScaffold(
+    return const AppScaffold(
       title: AppConstants.mapTitle,
       body: EmptyState(
         title: 'Map Screen',

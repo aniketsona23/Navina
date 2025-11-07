@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:camera/camera.dart';
 import 'dart:async';
 import '../providers/object_detection_provider.dart';
+import '../providers/text_to_speech_provider.dart';
+import '../services/visual_narration_service.dart';
 import '../utils/logger_util.dart';
 import '../widgets/emergency_sos_button.dart';
 
@@ -24,12 +26,20 @@ class _VisualAssistScreenModernState extends State<VisualAssistScreenModern>
   bool _isFullscreen = false;
   Timer? _captureTimer;
   int _selectedCameraIndex = 0;
+  VisualNarrationService? _narrationService;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _initializeCamera();
+    _initializeNarrationService();
+  }
+
+  void _initializeNarrationService() {
+    final ttsProvider =
+        Provider.of<TextToSpeechProvider>(context, listen: false);
+    _narrationService = VisualNarrationService(ttsProvider);
   }
 
   @override
@@ -50,6 +60,7 @@ class _VisualAssistScreenModernState extends State<VisualAssistScreenModern>
     WidgetsBinding.instance.removeObserver(this);
     _stopContinuousCapture();
     _cameraController?.dispose();
+    _narrationService?.stopNarration();
     super.dispose();
   }
 
@@ -132,6 +143,11 @@ class _VisualAssistScreenModernState extends State<VisualAssistScreenModern>
       final provider =
           Provider.of<ObjectDetectionProvider>(context, listen: false);
       await provider.detectObjects(image.path);
+
+      // Trigger narration if objects were detected
+      if (provider.detections.isNotEmpty && _narrationService != null) {
+        await _narrationService!.narrateDetections(provider.detections);
+      }
     } catch (e) {
       CameraLogger.error('Failed to capture and detect: $e');
       if (e.toString().contains('Camera') ||
@@ -246,6 +262,8 @@ class _VisualAssistScreenModernState extends State<VisualAssistScreenModern>
             _buildStatsCards(),
             const SizedBox(height: 20),
             _buildControlButtons(),
+            const SizedBox(height: 20),
+            _buildNarrationSettings(),
             const SizedBox(height: 20),
             _buildDetectionResults(),
           ],
@@ -400,8 +418,33 @@ class _VisualAssistScreenModernState extends State<VisualAssistScreenModern>
                             context,
                             listen: false);
                         provider.clearDetections();
+                        _narrationService?.clearRecentNarrations();
                       },
                       tooltip: 'Clear Detections',
+                    ),
+                    _buildModernButton(
+                      icon: _narrationService?.isNarrating == true
+                          ? Icons.stop
+                          : Icons.volume_up,
+                      onPressed: () {
+                        if (_narrationService?.isNarrating == true) {
+                          _narrationService?.stopNarration();
+                        } else {
+                          final provider = Provider.of<ObjectDetectionProvider>(
+                              context,
+                              listen: false);
+                          if (provider.detections.isNotEmpty) {
+                            _narrationService
+                                ?.narrateDetections(provider.detections);
+                          }
+                        }
+                      },
+                      tooltip: _narrationService?.isNarrating == true
+                          ? 'Stop Narration'
+                          : 'Narrate Objects',
+                      backgroundColor: _narrationService?.isNarrating == true
+                          ? Colors.red
+                          : const Color(0xFF16A34A),
                     ),
                   ],
                 ),
@@ -510,37 +553,84 @@ class _VisualAssistScreenModernState extends State<VisualAssistScreenModern>
   Widget _buildStatsCards() {
     return Consumer<ObjectDetectionProvider>(
       builder: (context, provider, child) {
-        return Row(
+        return Column(
           children: [
-            Expanded(
-              child: _buildStatCard(
-                'Objects Detected',
-                '${provider.detections.length}',
-                Icons.visibility,
-                const Color(0xFF2563EB),
-              ),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildStatCard(
+                    'Objects Detected',
+                    '${provider.detections.length}',
+                    Icons.visibility,
+                    const Color(0xFF2563EB),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildStatCard(
+                    'Processing Time',
+                    provider.processingTime > 0
+                        ? '${provider.processingTime.toStringAsFixed(0)}ms'
+                        : '0ms',
+                    Icons.speed,
+                    const Color(0xFF16A34A),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildStatCard(
+                    'Camera',
+                    _cameras != null
+                        ? '${_cameras!.length} Available'
+                        : '0 Available',
+                    Icons.camera_alt,
+                    const Color(0xFFEA580C),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildStatCard(
-                'Processing Time',
-                provider.processingTime > 0
-                    ? '${provider.processingTime.toStringAsFixed(0)}ms'
-                    : '0ms',
-                Icons.speed,
-                const Color(0xFF16A34A),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildStatCard(
-                'Camera',
-                _cameras != null
-                    ? '${_cameras!.length} Available'
-                    : '0 Available',
-                Icons.camera_alt,
-                const Color(0xFFEA580C),
-              ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildStatCard(
+                    'Narration',
+                    _narrationService?.isNarrating == true
+                        ? 'Speaking'
+                        : 'Ready',
+                    _narrationService?.isNarrating == true
+                        ? Icons.volume_up
+                        : Icons.volume_off,
+                    _narrationService?.isNarrating == true
+                        ? const Color(0xFF16A34A)
+                        : const Color(0xFF6B7280),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildStatCard(
+                    'Language',
+                    _narrationService?.currentLanguage ?? 'English',
+                    Icons.language,
+                    const Color(0xFF8B5CF6),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildStatCard(
+                    'TTS Status',
+                    _narrationService?.isEnabled == true
+                        ? 'Enabled'
+                        : 'Disabled',
+                    _narrationService?.isEnabled == true
+                        ? Icons.check_circle
+                        : Icons.cancel,
+                    _narrationService?.isEnabled == true
+                        ? const Color(0xFF16A34A)
+                        : const Color(0xFFEF4444),
+                  ),
+                ),
+              ],
             ),
           ],
         );
@@ -653,8 +743,29 @@ class _VisualAssistScreenModernState extends State<VisualAssistScreenModern>
                   final provider = Provider.of<ObjectDetectionProvider>(context,
                       listen: false);
                   provider.clearDetections();
+                  _narrationService?.clearRecentNarrations();
                 },
                 color: const Color(0xFF6B7280),
+              ),
+              _buildControlButton(
+                icon: _narrationService?.isNarrating == true
+                    ? Icons.stop
+                    : Icons.volume_up,
+                label:
+                    _narrationService?.isNarrating == true ? 'Stop' : 'Narrate',
+                onPressed: () {
+                  if (_narrationService?.isNarrating == true) {
+                    _narrationService?.stopNarration();
+                  } else {
+                    final provider = Provider.of<ObjectDetectionProvider>(
+                        context,
+                        listen: false);
+                    if (provider.detections.isNotEmpty) {
+                      _narrationService?.narrateDetections(provider.detections);
+                    }
+                  }
+                },
+                color: const Color(0xFF16A34A),
               ),
             ],
           ),
@@ -697,6 +808,191 @@ class _VisualAssistScreenModernState extends State<VisualAssistScreenModern>
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildNarrationSettings() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Audio Narration',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF1F2937),
+                ),
+              ),
+              Switch(
+                value: _narrationService?.isEnabled ?? true,
+                onChanged: (value) {
+                  setState(() {
+                    _narrationService?.setEnabled(value);
+                  });
+                },
+                activeColor: const Color(0xFF16A34A),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // Language Selection
+          if (_narrationService?.isEnabled == true) ...[
+            Row(
+              children: [
+                const Text(
+                  'Language: ',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF1F2937),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: DropdownButton<String>(
+                    value: _narrationService?.currentLanguage ?? 'English',
+                    isExpanded: true,
+                    items:
+                        (_narrationService?.supportedLanguages ?? ['English'])
+                            .map((String language) {
+                      return DropdownMenuItem<String>(
+                        value: language,
+                        child: Text(language),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      if (newValue != null) {
+                        setState(() {
+                          _narrationService?.setLanguage(newValue);
+                        });
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // Narration Controls
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      final provider = Provider.of<ObjectDetectionProvider>(
+                          context,
+                          listen: false);
+                      if (provider.detections.isNotEmpty) {
+                        _narrationService
+                            ?.narrateDetections(provider.detections);
+                      }
+                    },
+                    icon: const Icon(Icons.volume_up, size: 20),
+                    label: const Text('Narrate Objects'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF16A34A),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      _narrationService?.stopNarration();
+                    },
+                    icon: const Icon(Icons.stop, size: 20),
+                    label: const Text('Stop'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFEF4444),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // Last Narration Display
+            if (_narrationService?.lastNarration.isNotEmpty == true) ...[
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF3F4F6),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Text(
+                          'Last Narration:',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF6B7280),
+                          ),
+                        ),
+                        const Spacer(),
+                        Text(
+                          '(${_narrationService?.currentLanguage ?? 'English'})',
+                          style: const TextStyle(
+                            fontSize: 10,
+                            color: Color(0xFF6B7280),
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _narrationService!.lastNarration,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF1F2937),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ] else ...[
+            const Text(
+              'Audio narration is disabled. Enable it to hear descriptions of detected objects.',
+              style: TextStyle(
+                fontSize: 14,
+                color: Color(0xFF6B7280),
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 

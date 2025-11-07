@@ -7,3 +7,10 @@ env
 nayati_flutter/macos/*
 nayati_flutter/windows/*
 nayati_flutter/android/*
+**/.env
+.env*.local
+nayati_flutter/linux/flutter/generated_plugin_registrant.cc
+nayati_flutter/linux/flutter/generated_plugins.cmake
+nayati_flutter/macos/Flutter/GeneratedPluginRegistrant.swift
+nayati_flutter/windows/flutter/generated_plugin_registrant.cc
+nayati_flutter/windows/flutter/generated_plugins.cmake

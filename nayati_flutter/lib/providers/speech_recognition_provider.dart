@@ -176,4 +176,156 @@ class SpeechRecognitionProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  /// Maps language names to their corresponding locale IDs
+  String getLocaleIdForLanguage(String language) {
+    switch (language.toLowerCase()) {
+      case 'auto-detect':
+        return 'auto'; // Special case for auto-detection
+      case 'english':
+        return 'en_US';
+      case 'spanish':
+        return 'es_ES';
+      case 'french':
+        return 'fr_FR';
+      case 'german':
+        return 'de_DE';
+      case 'italian':
+        return 'it_IT';
+      case 'hindi':
+        return 'hi_IN';
+      default:
+        return 'en_US';
+    }
+  }
+
+  /// Sets the language for speech recognition
+  void setLanguage(String language) {
+    final localeId = getLocaleIdForLanguage(language);
+    setLocale(localeId);
+  }
+
+  /// Auto-detect language from spoken text
+  String _detectLanguageFromText(String text) {
+    // Simple language detection based on character patterns
+    // This is a basic implementation - in production, you'd use a proper language detection library
+
+    // Hindi detection - Devanagari script
+    final hindiRegex = RegExp(r'[\u0900-\u097F]');
+    if (hindiRegex.hasMatch(text)) {
+      return 'hi_IN';
+    }
+
+    // Spanish detection - common Spanish words/characters
+    final spanishWords = [
+      'hola',
+      'gracias',
+      'por favor',
+      'sí',
+      'no',
+      'adiós',
+      'ñ'
+    ];
+    if (spanishWords.any((word) => text.toLowerCase().contains(word))) {
+      return 'es_ES';
+    }
+
+    // French detection - common French words/characters
+    final frenchWords = [
+      'bonjour',
+      'merci',
+      's\'il vous plaît',
+      'oui',
+      'non',
+      'au revoir',
+      'ç',
+      'é',
+      'è'
+    ];
+    if (frenchWords.any((word) => text.toLowerCase().contains(word))) {
+      return 'fr_FR';
+    }
+
+    // German detection - common German words/characters
+    final germanWords = [
+      'hallo',
+      'danke',
+      'bitte',
+      'ja',
+      'nein',
+      'auf wiedersehen',
+      'ä',
+      'ö',
+      'ü',
+      'ß'
+    ];
+    if (germanWords.any((word) => text.toLowerCase().contains(word))) {
+      return 'de_DE';
+    }
+
+    // Italian detection - common Italian words
+    final italianWords = [
+      'ciao',
+      'grazie',
+      'per favore',
+      'sì',
+      'no',
+      'arrivederci'
+    ];
+    if (italianWords.any((word) => text.toLowerCase().contains(word))) {
+      return 'it_IT';
+    }
+
+    // Default to English if no pattern matches
+    return 'en_US';
+  }
+
+  /// Enhanced start listening with auto language detection
+  Future<void> startListeningWithAutoDetect() async {
+    if (!_isAvailable || _isListening) return;
+
+    SpeechLogger.info(
+        'Starting speech recognition with auto language detection...');
+
+    try {
+      await _speech.listen(
+        onResult: (result) {
+          SpeechLogger.debug('Speech result: ${result.recognizedWords}');
+          _currentText = result.recognizedWords;
+          _confidence = result.confidence;
+
+          // Auto-detect language if current locale is 'auto'
+          if (_currentLocaleId == 'auto' && result.recognizedWords.isNotEmpty) {
+            final detectedLocale =
+                _detectLanguageFromText(result.recognizedWords);
+            if (detectedLocale != _currentLocaleId) {
+              SpeechLogger.info('Auto-detected language: $detectedLocale');
+              setLocale(detectedLocale);
+              // Restart listening with detected language
+              _speech.stop();
+              Future.delayed(Duration(milliseconds: 500), () {
+                startListening();
+              });
+              return;
+            }
+          }
+
+          notifyListeners();
+        },
+        listenFor: _listenDuration,
+        pauseFor: _pauseDuration,
+        partialResults: true,
+        localeId: _currentLocaleId == 'auto'
+            ? 'en_US'
+            : _currentLocaleId, // Default to English for auto-detect
+        onSoundLevelChange: (level) {
+          // Optional: Handle sound level changes for visual feedback
+        },
+      );
+    } catch (e) {
+      SpeechLogger.error('Failed to start listening with auto-detect: $e');
+      _errorMessage = 'Failed to start listening: $e';
+      notifyListeners();
+    }
+  }
 }
