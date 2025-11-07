@@ -152,30 +152,33 @@ class HomeScreen extends StatelessWidget {
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: AppConstants.defaultSpacing),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildQuickAccessButton(
-              context,
-              'Map',
-              Icons.map_outlined,
-              () => context.go('/map'),
-            ),
-            const SizedBox(width: 16),
-            _buildQuickAccessButton(
-              context,
-              AppConstants.historyTitle,
-              Icons.history_outlined,
-              () => context.go('/history'),
-            ),
-            const SizedBox(width: AppConstants.defaultSpacing),
-            _buildQuickAccessButton(
-              context,
-              AppConstants.settingsTitle,
-              Icons.settings_outlined,
-              () => context.go('/settings'),
-            ),
-          ],
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildQuickAccessButton(
+                context,
+                'Map',
+                Icons.map_outlined,
+                () => context.go('/map'),
+              ),
+              const SizedBox(width: 16),
+              _buildQuickAccessButton(
+                context,
+                AppConstants.historyTitle,
+                Icons.history_outlined,
+                () => context.go('/history'),
+              ),
+              const SizedBox(width: AppConstants.defaultSpacing),
+              _buildQuickAccessButton(
+                context,
+                AppConstants.settingsTitle,
+                Icons.settings_outlined,
+                () => context.go('/settings'),
+              ),
+            ],
+          ),
         ),
       ],
     );

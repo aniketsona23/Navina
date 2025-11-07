@@ -9,12 +9,12 @@ import 'providers/navigation_provider.dart';
 import 'providers/speech_recognition_provider.dart';
 import 'providers/text_to_speech_provider.dart';
 import 'providers/history_provider.dart';
+import 'providers/sign_language_provider.dart';
 import 'services/config_service.dart';
 import 'providers/indoor_navigation_provider.dart';
 import 'providers/sign_language_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/history_screen.dart';
-import 'screens/map_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/visual_assist_screen.dart';
 import 'screens/hearing_assist_screen.dart';
@@ -55,6 +55,7 @@ class NayatiApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => SpeechRecognitionProvider()),
         ChangeNotifierProvider(create: (_) => TextToSpeechProvider()),
         ChangeNotifierProvider(create: (_) => HistoryProvider()),
+        ChangeNotifierProvider(create: (_) => SignLanguageProvider()),
         ChangeNotifierProvider(create: (_) => IndoorNavigationProvider()),
         ChangeNotifierProvider(create: (_) => SignLanguageProvider()),
       ],

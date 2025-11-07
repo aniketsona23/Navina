@@ -6,7 +6,7 @@ class ConfigService {
   
   // Default configurations
   static const String _defaultLocalUrl = 'http://localhost:8000/api';
-  static const String _defaultNetworkUrl = 'http://10.30.8.17:8000/api';
+  static const String _defaultNetworkUrl = 'http://10.30.11.234:8000/api';
   
   // Environment variable fallbacks
   static String? get _envBackendUrl => Platform.environment['BACKEND_URL'];
@@ -106,7 +106,7 @@ class ConfigService {
       ),
       ConfigOption(
         name: 'Team Network',
-        description: 'Connect to team network backend (10.30.8.17)',
+        description: 'Connect to team network backend (10.30.11.234)',
         url: _defaultNetworkUrl,
       ),
       ConfigOption(

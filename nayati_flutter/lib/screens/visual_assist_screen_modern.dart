@@ -5,6 +5,7 @@ import 'package:camera/camera.dart';
 import 'dart:async';
 import '../providers/object_detection_provider.dart';
 import '../utils/logger_util.dart';
+import 'sign_language_screen.dart';
 
 class VisualAssistScreenModern extends StatefulWidget {
   const VisualAssistScreenModern({super.key});
@@ -368,6 +369,19 @@ class _VisualAssistScreenModernState extends State<VisualAssistScreenModern> wit
                       isPrimary: true,
                     ),
                     _buildModernButton(
+                      icon: Icons.gesture,
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SignLanguageScreen(),
+                          ),
+                        );
+                      },
+                      tooltip: 'Sign Language Recognition',
+                      backgroundColor: const Color(0xFF8B5CF6),
+                    ),
+                    _buildModernButton(
                       icon: _isScanning ? Icons.stop : Icons.play_arrow,
                       onPressed: _toggleScanning,
                       tooltip: _isScanning ? 'Stop Scanning' : 'Start Scanning',
@@ -611,6 +625,19 @@ class _VisualAssistScreenModernState extends State<VisualAssistScreenModern> wit
                 onPressed: _toggleScanning,
                 color: _isScanning ? Colors.red : const Color(0xFF16A34A),
                 isPrimary: true,
+              ),
+              _buildControlButton(
+                icon: Icons.gesture,
+                label: 'Sign Language',
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SignLanguageScreen(),
+                    ),
+                  );
+                },
+                color: const Color(0xFF8B5CF6),
               ),
               if (_cameras != null && _cameras!.length > 1)
                 _buildControlButton(
